@@ -1,0 +1,366 @@
+local library = loadstring(game:GetObjects("rbxassetid://7657867786")[1].Source)()
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Teleport locations
+local locations = {
+    GunShop = CFrame.new(220.171661, 8.46437454, -170.447266),
+    Lamont = CFrame.new(513.776428, 4.2290206, 592.795532),
+    Cardealer = CFrame.new(730.25, 4.09018707, 454.079071),
+    Default = CFrame.new(734.010071, 7.98751068, 241.758301),
+    Backup = CFrame.new(1102.07434, 1.78096581, 529.418457),
+    MexicanDeli = CFrame.new(-778.234009, 2.18500328, -190.554016, -1, 0, 0, 0, 1, 0, 0, 0, -1),
+    Potato = CFrame.new(-460.458923, 9.42968273, -486.472107, -1, 0, 0, 0, 1, 0, 0, 0, -1),
+    BoxJob = CFrame.new(-580.23938, 3.85758209, -73.833168, 0, 0.107089333, -0.994249403, 0, 0.994249403, 0.107089333, 1, 0, 0),
+    Casino = CFrame.new(1181.64575, 23.4551086, 52.3608856, 0.911781788, -0.227362752, 0.341994405, 0.241942108, 0.970290661, 2.79247761e-05, -0.331840336, 0.0827173889, 0.939701974),
+    Garage = CFrame.new(1004.15082, 2.15275335, -325.725403, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+    Tattoo = CFrame.new(951.608704, 3.54601526, -69.0302658, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+    Shoe = CFrame.new(524.763245, 3.9565177, -201.625061, -1, 0, 0, 0, 1, 0, 0, 0, -1),
+    JunkBuyer = CFrame.new(74.8996124, 4.12662411, 16.129612, -1, 0, 0, 0, 0.980801582, 0.195008218, 0, 0.195008218, -0.980801582),
+    Safezone = CFrame.new(1131.5542, 22.75, 173.402405, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+    Bank = C
+    Custom = CFrame.new()
+}
+
+-- Premium GUI variables
+local premiumScreen
+
+local function createPremiumScreen()
+    if player.PlayerGui:FindFirstChild("PremiumTeleportGUI") then
+        player.PlayerGui.PremiumTeleportGUI:Destroy()
+    end
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "PremiumTeleportGUI"
+    screenGui.IgnoreGuiInset = true
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.Parent = player.PlayerGui
+
+    -- Main frame
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.Position = UDim2.new(0, 0, 0, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(10, 5, 20)
+    frame.BorderSizePixel = 0
+    frame.Visible = false
+    frame.Parent = screenGui
+
+    -- Gold border
+    local border = Instance.new("Frame")
+    border.Size = UDim2.new(1, 0, 0, 6)
+    border.Position = UDim2.new(0, 0, 0, 0)
+    border.BackgroundColor3 = Color3.fromRGB(212, 175, 55)
+    border.BorderSizePixel = 0
+    border.Parent = frame
+
+    -- Crown logo
+    local logo = Instance.new("ImageLabel")
+    logo.Name = "PremiumLogo"
+    logo.Size = UDim2.new(0, 150, 0, 150)
+    logo.Position = UDim2.new(0.5, -75, 0.3, -75)
+    logo.BackgroundTransparency = 1
+    logo.Image = "rbxassetid://7072718362"
+    logo.ImageColor3 = Color3.fromRGB(212, 175, 55)
+    logo.ScaleType = Enum.ScaleType.Fit
+    logo.Parent = frame
+
+    -- Main title
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 60)
+    title.Position = UDim2.new(0, 0, 0.4, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "PREMIUM TELEPORT SYSTEM"
+    title.TextColor3 = Color3.fromRGB(212, 175, 55)
+    title.Font = Enum.Font.GothamBlack
+    title.TextSize = 36
+    title.TextStrokeTransparency = 0.5
+    title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    title.Parent = frame
+
+    -- Signature text
+    local signature = Instance.new("TextLabel")
+    signature.Size = UDim2.new(1, 0, 0, 30)
+    signature.Position = UDim2.new(0, 0, 0.55, 0)
+    signature.BackgroundTransparency = 1
+    signature.Text = "Best Free Script? --> Whoisthisugly"
+    signature.TextColor3 = Color3.fromRGB(200, 200, 255)
+    signature.Font = Enum.Font.GothamBold
+    signature.TextSize = 24
+    signature.Parent = frame
+
+    -- Credit text
+    local credit = Instance.new("TextLabel")
+    credit.Size = UDim2.new(1, 0, 0, 25)
+    credit.Position = UDim2.new(0, 0, 0.6, 0)
+    credit.BackgroundTransparency = 1
+    credit.Text = "Teleport system made by Lifea"
+    credit.TextColor3 = Color3.fromRGB(180, 180, 255)
+    credit.Font = Enum.Font.Gotham
+    credit.TextSize = 20
+    credit.Parent = frame
+
+    -- Discord link
+    local discord = Instance.new("TextLabel")
+    discord.Size = UDim2.new(1, 0, 0, 25)
+    discord.Position = UDim2.new(0, 0, 0.65, 0)
+    discord.BackgroundTransparency = 1
+    discord.Text = "https://discord.gg/qs8brntYrN"
+    discord.TextColor3 = Color3.fromRGB(100, 150, 255)
+    discord.Font = Enum.Font.Gotham
+    discord.TextSize = 18
+    discord.Parent = frame
+
+    -- Loading text
+    local loading = Instance.new("TextLabel")
+    loading.Size = UDim2.new(1, 0, 0, 30)
+    loading.Position = UDim2.new(0, 0, 0.8, 0)
+    loading.BackgroundTransparency = 1
+    loading.Text = "Teleporting..."
+    loading.TextColor3 = Color3.fromRGB(255, 255, 255)
+    loading.Font = Enum.Font.GothamBold
+    loading.TextSize = 22
+    loading.Parent = frame
+
+    return frame
+end
+
+local function showPremiumScreen()
+    premiumScreen = createPremiumScreen()
+    premiumScreen.Visible = true
+end
+
+local function hidePremiumScreen()
+    if premiumScreen and premiumScreen.Parent then
+        premiumScreen.Parent:Destroy()
+    end
+end
+
+local function anchorCharacter(enable)
+    if character then
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Anchored = enable
+                if enable then
+                    part.AssemblyLinearVelocity = Vector3.new()
+                    part.AssemblyAngularVelocity = Vector3.new()
+                end
+            end
+        end
+    end
+end
+
+local function safeTeleport(cframe)
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return false end
+    
+    anchorCharacter(true)
+    
+    character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new()
+    character.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new()
+    
+    character.HumanoidRootPart.CFrame = cframe
+    
+    delay(0.5, function()
+        anchorCharacter(false)
+    end)
+    
+    return true
+end
+
+local function parseCFrame(text)
+    local success, result = pcall(function()
+        return loadstring("return "..text)()
+    end)
+    
+    if success and typeof(result) == "CFrame" then
+        return result
+    end
+    
+    local components = {}
+    for num in text:gmatch("-?%d+%.?%d*") do
+        table.insert(components, tonumber(num))
+    end
+    
+    if #components >= 12 then
+        return CFrame.new(
+            components[1], components[2], components[3],
+            components[4], components[5], components[6],
+            components[7], components[8], components[9],
+            components[10], components[11], components[12]
+        )
+    elseif #components >= 3 then
+        return CFrame.new(components[1], components[2], components[3])
+    end
+    
+    return nil
+end
+
+-- UI Creation
+local PepsisWorld = library:CreateWindow({
+    Name = "Pepsi's World Premium",
+    Themeable = {Info = "Discord Server: VzYTJ7Y"}
+})
+
+local GeneralTab = PepsisWorld:CreateTab({Name = "Teleport"})
+local TeleportSection = GeneralTab:CreateSection({Name = "Premium Teleport", Side = "Left"})
+
+local selectedLocation = "GunShop"
+local customPositionText = ""
+
+TeleportSection:AddDropdown({
+    Name = 'Select Location',
+    Flag = 'selected_location',
+    Multi = false,
+    List = {'GunShop', 'Lamont', 'Cardealer', 'MexicanDeli', 'Potato', 'BoxJob', 'Casino', 'Garage', 'Tattoo', 'Shoe', 'Custom', 'Safezone', 'JunkBuyer'},
+    Callback = function(selection)
+        selectedLocation = selection
+    end
+})
+
+TeleportSection:AddTextbox({
+    Name = 'Custom CFrame',
+    Flag = 'custom_position',
+    Value = '',
+    PlaceholderText = 'Paste CFrame here',
+    Callback = function(text)
+        customPositionText = text
+    end
+})
+
+TeleportSection:AddButton({
+    Name = 'Copy Current Position',
+    Callback = function()
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local cframe = character.HumanoidRootPart.CFrame
+            setclipboard(tostring(cframe))
+            library:Notify("Position copied to clipboard!")
+        else
+            library:Notify("Character not found!")
+        end
+    end
+})
+
+local function getRandomHomelessModel()
+    local homelessFolder = workspace:FindFirstChild("HomelessPeople")
+    if not homelessFolder then 
+        safeTeleport(locations.Backup)
+        return nil 
+    end
+    
+    local models = {}
+    for _, model in ipairs(homelessFolder:GetChildren()) do
+        if model:IsA("Model") and model:FindFirstChild("UpperTorso") then
+            table.insert(models, model)
+        end
+    end
+    
+    if #models == 0 then
+        safeTeleport(locations.Backup)
+        return nil
+    end
+    
+    return models[math.random(1, #models)]
+end
+
+local function teleportToDestination()
+    if selectedLocation == "Custom" then
+        if customPositionText ~= "" then
+            local parsedCFrame = parseCFrame(customPositionText)
+            if parsedCFrame then
+                locations.Custom = parsedCFrame
+            else
+                library:Notify("Invalid custom position!", 3)
+                hidePremiumScreen()
+                return
+            end
+        else
+            library:Notify("No custom position set!", 3)
+            hidePremiumScreen()
+            return
+        end
+    end
+    
+    local targetCFrame = locations[selectedLocation] or locations.Default
+    safeTeleport(targetCFrame)
+    delay(5, hidePremiumScreen)
+end
+
+local function triggerProximityPrompt(npcModel)
+    local upperTorso = npcModel:FindFirstChild("UpperTorso")
+    if not upperTorso then 
+        teleportToDestination()
+        return 
+    end
+    
+    local prompt = upperTorso:FindFirstChildOfClass("ProximityPrompt")
+    if not prompt then 
+        teleportToDestination()
+        return 
+    end
+    
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then 
+        teleportToDestination()
+        return 
+    end
+    
+    local connection
+    connection = RunService.Heartbeat:Connect(function()
+        if humanoid.Health > 10 then
+            fireproximityprompt(prompt)
+            humanoid.Health = humanoid.Health - 0.1
+        else
+            connection:Disconnect()
+            teleportToDestination()
+        end
+    end)
+end
+
+local function startTeleportProcess()
+    showPremiumScreen()
+    
+    local npcModel = getRandomHomelessModel()
+    local attempts = 0
+    local maxAttempts = 10
+    
+    while not npcModel and attempts < maxAttempts do
+        wait(0.3)
+        npcModel = getRandomHomelessModel()
+        attempts = attempts + 1
+    end
+    
+    if not npcModel then
+        teleportToDestination()
+        return
+    end
+    
+    local npcRoot = npcModel:FindFirstChild("HumanoidRootPart")
+    if not npcRoot or not character or not character:FindFirstChild("HumanoidRootPart") then
+        teleportToDestination()
+        return
+    end
+    
+    safeTeleport(npcRoot.CFrame * CFrame.new(0, 0, -2))
+    triggerProximityPrompt(npcModel)
+end
+
+TeleportSection:AddButton({
+    Name = 'Start Teleport',
+    Callback = startTeleportProcess
+})
+
+-- Character handling
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    hidePremiumScreen()
+    delay(1, function()
+        anchorCharacter(false)
+    end)
+end)
+
+-- Initialize
+if character then
+    anchorCharacter(false)
+end
