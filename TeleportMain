@@ -3,9 +3,10 @@ local Wait = library.subs.Wait
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-
+local camera = workspace.CurrentCamera
 
 -- Create premium teleport overlay GUI
 local screenGui = Instance.new("ScreenGui")
@@ -23,8 +24,9 @@ frame.BackgroundColor3 = Color3.fromRGB(10, 5, 20)
 frame.BorderSizePixel = 0
 frame.Visible = false
 frame.Parent = screenGui
+frame.Transparency = 0
 
--- Gold border
+-- Gold border with glow effect
 local border = Instance.new("Frame")
 border.Size = UDim2.new(1, 0, 0, 6)
 border.Position = UDim2.new(0, 0, 0, 0)
@@ -32,7 +34,27 @@ border.BackgroundColor3 = Color3.fromRGB(212, 175, 55)
 border.BorderSizePixel = 0
 border.Parent = frame
 
--- Crown logo
+-- Border glow effect
+local borderGlow = Instance.new("Frame")
+borderGlow.Size = UDim2.new(1, 10, 1, 10)
+borderGlow.Position = UDim2.new(0, -5, 0, -5)
+borderGlow.BackgroundTransparency = 1
+borderGlow.Parent = border
+
+local glowCorner = Instance.new("UICorner")
+glowCorner.CornerRadius = UDim.new(0.5, 0)
+glowCorner.Parent = borderGlow
+
+local glowGradient = Instance.new("UIGradient")
+glowGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(212, 175, 55)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 215, 100)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(212, 175, 55))
+})
+glowGradient.Rotation = 90
+glowGradient.Parent = borderGlow
+
+-- Crown logo with shine effect
 local logo = Instance.new("ImageLabel")
 logo.Name = "PremiumLogo"
 logo.Size = UDim2.new(0, 150, 0, 150)
@@ -43,7 +65,20 @@ logo.ImageColor3 = Color3.fromRGB(212, 175, 55)
 logo.ScaleType = Enum.ScaleType.Fit
 logo.Parent = frame
 
--- Main title
+-- Crown shine animation
+local shine = Instance.new("ImageLabel")
+shine.Name = "Shine"
+shine.Size = UDim2.new(1.5, 0, 1.5, 0)
+shine.Position = UDim2.new(0.5, 0, 0.5, 0)
+shine.AnchorPoint = Vector2.new(0.5, 0.5)
+shine.BackgroundTransparency = 1
+shine.Image = "rbxassetid://8992230673"
+shine.ImageTransparency = 0.8
+shine.ImageColor3 = Color3.fromRGB(255, 255, 255)
+shine.Rotation = -45
+shine.Parent = logo
+
+-- Main title with animation
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 60)
 title.Position = UDim2.new(0, 0, 0.4, 0)
@@ -56,7 +91,17 @@ title.TextStrokeTransparency = 0.5
 title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 title.Parent = frame
 
--- Signature text
+-- Title glow effect
+local titleGlow = Instance.new("UIGradient")
+titleGlow.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(212, 175, 55)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 215, 100)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(212, 175, 55))
+})
+titleGlow.Rotation = 90
+titleGlow.Parent = title
+
+-- Signature text with animation
 local signature = Instance.new("TextLabel")
 signature.Size = UDim2.new(1, 0, 0, 30)
 signature.Position = UDim2.new(0, 0, 0.55, 0)
@@ -67,7 +112,7 @@ signature.Font = Enum.Font.GothamBold
 signature.TextSize = 24
 signature.Parent = frame
 
--- Credit text
+-- Credit text with animation
 local credit = Instance.new("TextLabel")
 credit.Size = UDim2.new(1, 0, 0, 25)
 credit.Position = UDim2.new(0, 0, 0.6, 0)
@@ -78,7 +123,7 @@ credit.Font = Enum.Font.Gotham
 credit.TextSize = 20
 credit.Parent = frame
 
--- Discord link
+-- Discord link with animation
 local discord = Instance.new("TextLabel")
 discord.Size = UDim2.new(1, 0, 0, 25)
 discord.Position = UDim2.new(0, 0, 0.65, 0)
@@ -89,7 +134,7 @@ discord.Font = Enum.Font.Gotham
 discord.TextSize = 18
 discord.Parent = frame
 
--- Loading text
+-- Loading text with animation
 local loading = Instance.new("TextLabel")
 loading.Size = UDim2.new(1, 0, 0, 30)
 loading.Position = UDim2.new(0, 0, 0.8, 0)
@@ -100,7 +145,7 @@ loading.Font = Enum.Font.GothamBold
 loading.TextSize = 22
 loading.Parent = frame
 
--- Destination text (will be updated when teleporting)
+-- Destination text with animation
 local destinationText = Instance.new("TextLabel")
 destinationText.Size = UDim2.new(1, 0, 0, 30)
 destinationText.Position = UDim2.new(0, 0, 0.85, 0)
@@ -113,7 +158,7 @@ destinationText.Parent = frame
 
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Tüm lokasyonlar eklendi
+-- Tüm lokasyonlar
 local locations = {
     GunShop = CFrame.new(220.171661, 8.46437454, -170.447266, 1, 0, 0, 0, 1, 0, 0, 0, 1),
     Lamont = CFrame.new(513.776428, 4.2290206, 592.795532, 1, 0, 0, 0, 1, 0, 0, 0, 1),
@@ -168,9 +213,58 @@ local soundConnection = nil
 local bloodElements = {}
 local originalBloodStates = {}
 local teleportTimeout = 20 -- seconds
+local shineTween = nil
+local titleGlowTween = nil
+local loadingPulseTween = nil
 
+-- Fade out fonksiyonu
+local function fadeOutGUI()
+    -- Tüm animasyonları durdur
+    if shineTween then shineTween:Cancel() end
+    if titleGlowTween then titleGlowTween:Cancel() end
+    if loadingPulseTween then loadingPulseTween:Cancel() end
 
--- Add this function to permanently disable blood effects
+    -- Tüm elementleri fade out yap
+    local tweenInfo = TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    
+    -- Frame ve border
+    TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1}):Play()
+    TweenService:Create(border, tweenInfo, {BackgroundTransparency = 1}):Play()
+    
+    -- Logo ve shine efekti
+    TweenService:Create(logo, tweenInfo, {ImageTransparency = 1}):Play()
+    TweenService:Create(shine, tweenInfo, {ImageTransparency = 1, Size = UDim2.new(0, 0, 0, 0)}):Play()
+    
+    -- Tüm text elementleri
+    local textElements = {title, signature, credit, discord, loading, destinationText}
+    for _, element in ipairs(textElements) do
+        TweenService:Create(element, tweenInfo, {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
+    end
+
+    -- Fade out tamamlandığında GUI'yi tamamen kapat
+    delay(0.75, function()
+        frame.Visible = false
+        enableKnockoutSound()
+        
+        -- Değerleri resetle
+        loading.Text = "Teleporting..."
+        destinationText.Text = ""
+        
+        -- Transparency değerlerini sıfırla
+        frame.BackgroundTransparency = 0
+        border.BackgroundTransparency = 0
+        logo.ImageTransparency = 0
+        shine.ImageTransparency = 0.8
+        shine.Size = UDim2.new(1.5, 0, 1.5, 0)
+        
+        for _, element in ipairs(textElements) do
+            element.TextTransparency = 0
+            element.TextStrokeTransparency = 0.5
+        end
+    end)
+end
+
+-- Kan efektlerini devre dışı bırak
 local function disableBloodEffectsPermanently()
     local playerGui = player:FindFirstChild("PlayerGui")
     if not playerGui then return end
@@ -181,7 +275,6 @@ local function disableBloodEffectsPermanently()
     local bloodFolder = miscGui:FindFirstChild("Blood")
     if not bloodFolder then return end
 
-    -- Disable all ImageLabels, Impacts, and LocalScripts in BloodFolder
     for _, element in ipairs(bloodFolder:GetDescendants()) do
         if element:IsA("ImageLabel") or element:IsA("ParticleEmitter") or element.Name == "Impact" or element:IsA("LocalScript") then
             table.insert(bloodElements, element)
@@ -197,58 +290,8 @@ local function disableBloodEffectsPermanently()
     end
 end
 
-
--- Add this function to disable blood effects
-local function disableBloodEffects()
-    local playerGui = player:FindFirstChild("PlayerGui")
-    if not playerGui then return end
-    
-    local miscGui = playerGui:FindFirstChild("Misc")
-    if not miscGui then return end
-    
-    local bloodFolder = miscGui:FindFirstChild("Blood")
-    if not bloodFolder then return end
-    
-    -- Store original states and disable all blood elements
-    for _, element in ipairs(bloodFolder:GetDescendants()) do
-        if element:IsA("BasePart") or element:IsA("ParticleEmitter") or element:IsA("Decal") then
-            table.insert(bloodElements, element)
-            originalBloodStates[element] = {
-                Transparency = element:GetPropertyChangedSignal("Transparency") and element.Transparency,
-                Enabled = element:IsA("ParticleEmitter") and element.Enabled
-            }
-            
-            if element:IsA("BasePart") or element:IsA("Decal") then
-                element.Transparency = 1
-            elseif element:IsA("ParticleEmitter") then
-                element.Enabled = false
-            end
-        end
-    end
-end
-
--- Add this function to restore blood effects
-local function restoreBloodEffects()
-    for _, element in ipairs(bloodElements) do
-        local originalState = originalBloodStates[element]
-        if originalState then
-            if element:IsA("BasePart") or element:IsA("Decal") then
-                element.Transparency = originalState.Transparency or 0
-            elseif element:IsA("ParticleEmitter") then
-                element.Enabled = originalState.Enabled
-            end
-        end
-    end
-    
-    -- Clear the tables
-    bloodElements = {}
-    originalBloodStates = {}
-end
-
-
--- Function to find and disable the knockout sound
+-- Knockout sesini devre dışı bırak
 local function disableKnockoutSound()
-    -- Try to find the sound in StarterPlayerScripts
     local playerScripts = player:FindFirstChild("PlayerScripts")
     if playerScripts then
         local main = playerScripts:FindFirstChild("Main")
@@ -264,15 +307,13 @@ local function disableKnockoutSound()
     end
 end
 
--- Function to re-enable the knockout sound
+-- Knockout sesini tekrar aç
 local function enableKnockoutSound()
     if knockoutSound then
         knockoutSound.Volume = 1
         knockoutSound = nil
     end
 end
-
--- Genişletilmiş lokasyon listesi
 
 TeleportSection:CreateLabel({Text = 'Notice: if u use it wrong,'})
 TeleportSection:CreateLabel({Text = 'Notice: it will kick u.'})
@@ -327,9 +368,107 @@ local function getRandomHomelessModel()
     end
 end
 
+-- Animasyon fonksiyonları
+local function startAnimations()
+    -- Crown shine rotation animation
+    if shineTween then shineTween:Cancel() end
+    shineTween = TweenService:Create(shine, TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {
+        Rotation = 45
+    })
+    shineTween:Play()
+    
+    -- Title glow animation
+    if titleGlowTween then titleGlowTween:Cancel() end
+    titleGlowTween = TweenService:Create(titleGlow, TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {
+        Offset = Vector2.new(1, 0)
+    })
+    titleGlowTween:Play()
+    
+    -- Loading text pulse animation
+    if loadingPulseTween then loadingPulseTween:Cancel() end
+    
+    local function pulseLoading()
+        local pulseIn = TweenService:Create(loading, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            TextSize = 26
+        })
+        
+        local pulseOut = TweenService:Create(loading, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            TextSize = 22
+        })
+        
+        pulseIn:Play()
+        pulseIn.Completed:Connect(function()
+            pulseOut:Play()
+            pulseOut.Completed:Connect(function()
+                if loading.Text == "Teleporting..." then
+                    pulseLoading()
+                end
+            end)
+        end)
+    end
+    
+    pulseLoading()
+end
+
+local function animateTeleportComplete()
+    -- Change loading text and animate
+    loading.Text = "Teleport Completed!"
+    
+    -- Success color animation
+    local successColor = TweenService:Create(loading, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        TextColor3 = Color3.fromRGB(100, 255, 100)
+    })
+    
+    local returnColor = TweenService:Create(loading, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 1), {
+        TextColor3 = Color3.fromRGB(255, 255, 255)
+    })
+    
+    -- Pulse animation for completion
+    local completePulseIn = TweenService:Create(loading, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        TextSize = 28
+    })
+    
+    local completePulseOut = TweenService:Create(loading, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        TextSize = 24
+    })
+    
+    successColor:Play()
+    successColor.Completed:Connect(function()
+        completePulseIn:Play()
+        completePulseIn.Completed:Connect(function()
+            completePulseOut:Play()
+            completePulseOut.Completed:Connect(function()
+                returnColor:Play()
+            end)
+        end)
+    end)
+end
+
+local function checkArrival()
+    if not arrivalTime then return false end
+    local elapsed = tick() - arrivalTime
+    
+    -- 1 saniye sonra "Teleport Completed!" mesajını göster
+    if elapsed >= 1 and loading.Text ~= "Teleport Completed!" then
+        loading.Text = "Teleport Completed!"
+        animateTeleportComplete()
+    end
+    
+    -- 3 saniye sonra fade out başlat
+    if elapsed >= 3 then
+        fadeOutGUI()
+        arrivalTime = nil
+        return true
+    end
+    
+    return false
+end
+
 local function triggerProximityPrompt(npcModel)
     local upperTorso = npcModel:FindFirstChild("UpperTorso")
     if not upperTorso then return end
+    
+    camera.CFrame = CFrame.lookAt(camera.CFrame.Position, upperTorso.Position)
     
     local prompt = upperTorso:FindFirstChildOfClass("ProximityPrompt")
     if not prompt then return end
@@ -337,21 +476,27 @@ local function triggerProximityPrompt(npcModel)
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     if not humanoid then return end
     
-    -- Önceki bağlantıyı kes
     if connection then
         connection:Disconnect()
+        connection = nil
     end
+    
+    startAnimations()
     
     connection = RunService.Heartbeat:Connect(function()
         if humanoid.Health > 10 then
             fireproximityprompt(prompt)
             humanoid.Health = humanoid.Health - 0.0
+            camera.CFrame = CFrame.lookAt(camera.CFrame.Position, upperTorso.Position)
         else
-            connection:Disconnect()
-            if character:FindFirstChild("HumanoidRootPart") then
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
+            
+            if character and character:FindFirstChild("HumanoidRootPart") then
                 character.HumanoidRootPart.CFrame = locations[selectedLocation] or locations.Default
-                arrivalTime = tick() -- Record arrival time
-                loading.Text = "Teleport Complete!"
+                arrivalTime = tick()
                 destinationText.Text = "Arrived at: "..selectedLocation
             end
         end
@@ -361,9 +506,20 @@ end
 local function checkAndTeleportToHomeless()
     local npcModel = getRandomHomelessModel()
     
-    while not npcModel do
-        wait(0.0)
-        npcModel = getRandomHomelessModel()
+    -- Special handling for Backup location
+    if selectedLocation == "Backup" then
+        while not npcModel do
+            wait(0.1)
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                character.HumanoidRootPart.CFrame = locations.Backup
+            end
+            npcModel = getRandomHomelessModel()
+        end
+    else
+        while not npcModel do
+            wait(0.1)
+            npcModel = getRandomHomelessModel()
+        end
     end
     
     local npcRoot = npcModel:FindFirstChild("HumanoidRootPart")
@@ -376,27 +532,11 @@ local function checkAndTeleportToHomeless()
     triggerProximityPrompt(npcModel)
 end
 
--- Function to check if we've arrived at destination
-local function checkArrival()
-    if not arrivalTime then return false end
-    if tick() - arrivalTime >= 5 then
-        arrivalTime = nil
-        return true
-    end
-    return false
-end
-
--- Run a loop to check when to hide the overlay
+-- Kontrol döngüsü
 spawn(function()
     while true do
-        if frame.Visible and checkArrival() then
-            frame.Visible = false
-            loading.Text = "Teleporting..."
-            destinationText.Text = ""
-             enableKnockoutSound()
-             restoreBloodEffects()
-        
-            soundConnection = nil
+        if frame.Visible and arrivalTime then
+            checkArrival()
         end
         wait(0.1)
     end
@@ -406,59 +546,55 @@ local function startTeleportProcess()
     if teleporting then return end
     teleporting = true
     
-    -- Show premium overlay
+    -- Değişkenleri sıfırla
+    arrivalTime = nil
+    
+    -- GUI'yi hazırla
     frame.Visible = true
-     disableKnockoutSound()
+    disableKnockoutSound()
     disableBloodEffectsPermanently()
     destinationText.Text = "Destination: "..selectedLocation
+    loading.Text = "Teleporting..."
 
-     -- Start timeout timer
+    -- Animasyonları başlat
+    startAnimations()
+
     local teleportStartTime = tick()
     local timeoutReached = false
     
-    
-  -- Create a separate connection to check for timeout
+    -- Timeout kontrolü
     local timeoutConnection
     timeoutConnection = RunService.Heartbeat:Connect(function()
         if tick() - teleportStartTime >= teleportTimeout then
             timeoutReached = true
-            frame.Visible = false
-            loading.Text = "Teleporting..."
-            destinationText.Text = ""
-            enableKnockoutSound()
-            restoreBloodEffects()
+            fadeOutGUI()
             
-            if timeoutConnection then
-                timeoutConnection:Disconnect()
-            end
             if connection then
                 connection:Disconnect()
+                connection = nil
             end
+            
             teleporting = false
-        library:Notify({
-                Text = 'Teleport timed out after '..teleportTimeout..' seconds', 
-                Duration = 5  -- Show for 5 seconds
-            })
+            library:Notify("Teleport timed out after "..teleportTimeout.." seconds", 5)
         end
     end)
 
+    -- Teleport işlemini başlat
     spawn(function() 
         checkAndTeleportToHomeless()
         
-        -- Only proceed if timeout hasn't been reached
+        -- Konum kontrolü
         while not timeoutReached do
             if character and character:FindFirstChild("HumanoidRootPart") then
                 local currentPos = character.HumanoidRootPart.Position
                 local targetPos = locations[selectedLocation].Position
                 if (currentPos - targetPos).Magnitude < 10 then
-                    -- We've arrived, break the loop
                     break
                 end
             end
             wait(0.1)
         end
           
-     -- Clean up timeout connection if teleport completed successfully
         if not timeoutReached and timeoutConnection then
             timeoutConnection:Disconnect()
         end
@@ -466,6 +602,7 @@ local function startTeleportProcess()
     
     teleporting = false
 end
+
 TeleportSection:AddButton({
     Name = 'Start Teleport Process',
     Callback = startTeleportProcess
@@ -475,9 +612,27 @@ player.CharacterAdded:Connect(function(newChar)
     character = newChar
     if connection then
         connection:Disconnect()
+        connection = nil
     end
-    -- Re-parent the screen GUI to the new player GUI
+    
     if screenGui then
         screenGui.Parent = player:WaitForChild("PlayerGui")
     end
+    
+    -- Animasyonları durdur
+    if shineTween then 
+        shineTween:Cancel()
+        shineTween = nil
+    end
+    if titleGlowTween then 
+        titleGlowTween:Cancel()
+        titleGlowTween = nil
+    end
+    if loadingPulseTween then 
+        loadingPulseTween:Cancel()
+        loadingPulseTween = nil
+    end
+    
+    -- Değişkenleri sıfırla
+    arrivalTime = nil
 end)
