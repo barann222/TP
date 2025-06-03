@@ -571,7 +571,7 @@ local function startTeleportProcess()
     
     -- Reset GUI state
     frame.Visible = true
-    frame.Transparency = 1
+    frame.Transparency = 0
     loading.Text = "Teleporting..."
     destinationText.Text = "Destination: "..selectedLocation
     
@@ -1092,7 +1092,7 @@ AutoFarmSection:AddButton({
                     
                     -- Start teleport process with custom callback
                     frame.Visible = true
-                    frame.Transparency = 1
+                    frame.Transparency = 0
                     disableKnockoutSound()
                     disableBloodEffectsPermanently()
                     destinationText.Text = "Destination: Active ATM"
@@ -1403,4 +1403,3 @@ player.CharacterAdded:Connect(function(newChar)
     if titleGlowTween then titleGlowTween:Cancel() end
     if loadingPulseTween then loadingPulseTween:Cancel() end
 end)
-
