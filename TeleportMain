@@ -1,5 +1,5 @@
-local library = loadstring(game:GetObjects("rbxassetid://7657867786")[1].Source)()
-local Wait = library.subs.Wait
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/whoisthisugl2/ss/refs/heads/main/pepsiplayermain"))()
+
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -7,6 +7,8 @@ local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local camera = workspace.CurrentCamera
+local part = workspace.Blank
+local humanoid = character:FindFirstChildOfClass("Humanoid")
 
 -- Create premium teleport overlay GUI
 local screenGui = Instance.new("ScreenGui")
@@ -24,6 +26,8 @@ frame.BackgroundColor3 = Color3.fromRGB(10, 5, 20)
 frame.BorderSizePixel = 0
 frame.Visible = false
 frame.Parent = screenGui
+frame.Transparency = 1
+frame.ZIndex = 999999
 
 -- Gold border with glow effect
 local border = Instance.new("Frame")
@@ -160,7 +164,7 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 -- Tüm lokasyonlar
 local locations = {
     GunShop = CFrame.new(220.171661, 8.46437454, -170.447266, 1, 0, 0, 0, 1, 0, 0, 0, 1),
-    Lamont = CFrame.new(513.776428, 4.2290206, 592.795532, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+    Lamont = CFrame.new(509.79107666015625, 3.5872106552124023, 599.5184326171875),
     Cardealer = CFrame.new(730.25, 4.09018707, 454.079071, 1, 0, 0, 0, 1, 0, 0, 0, 1),
     Default = CFrame.new(734.010071, 7.98751068, 241.758301, 1, 0, 0, 0, 1, 0, 0, 0, 1),
     Backup = CFrame.new(1102.07434, 1.78096581, 529.418457, 1, -1.28371894e-31, -2.36612192e-30, -1.28371894e-31, 0.994130254, -0.108189844, 2.36612192e-30, 0.108189844, 0.994130254),
@@ -168,7 +172,7 @@ local locations = {
     Potato = CFrame.new(-460.458923, 9.42968273, -486.472107, -1, 0, 0, 0, 1, 0, 0, 0, -1),
     BoxJob = CFrame.new(-580.23938, 3.85758209, -73.833168, 0, 0.107089333, -0.994249403, 0, 0.994249403, 0.107089333, 1, 0, 0),
     Casino = CFrame.new(1181.64575, 23.4551086, 52.3608856, 0.911781788, -0.227362752, 0.341994405, 0.241942108, 0.970290661, 2.79247761e-05, -0.331840336, 0.0827173889, 0.939701974),
-    Garage = CFrame.new(1004.15082, 2.15275335, -325.725403, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+    Garage = CFrame.new(1007.80517578125, 3.612133502960205, -325.2452392578125),
     Tattoo = CFrame.new(951.608704, 3.54601526, -69.0302658, 1, 0, 0, 0, 1, 0, 0, 0, 1),
     Shoe = CFrame.new(524.763245, 3.9565177, -201.625061, -1, 0, 0, 0, 1, 0, 0, 0, -1),
     JunkBuyer = CFrame.new(74.8996124, 4.12662411, 16.129612, -1, 0, 0, 0, 0.980801582, 0.195008218, 0, 0.195008218, -0.980801582),
@@ -184,24 +188,59 @@ local locations = {
     ["Kevins Drip"] = CFrame.new(-202.83302307128906, 3.487137794494629, -59.08943557739258),
     ["Apartments 1"] = CFrame.new(-518.384765625, 3.7872252464294434, 210.3058624267578),
     ["Apartments 2"] = CFrame.new(-276.6080627441406, 4.362135887145996, -475.66217041015625),
-    ["Apartments 3"] = CFrame.new(215.5399627685547, 5.237135887145996, 26.223546981811523)
+    ["Apartments 3"] = CFrame.new(215.5399627685547, 5.237135887145996, 26.223546981811523),
+    -- Auto Farm Locations
+    FakeIDSeller = CFrame.new(218.456451, 5.737133, -331.716003),
+    BankTeller = CFrame.new(-50.366447, 5.737139, -315.462555),
+    FinalPosition = CFrame.new(-39.769119, 5.859778, -331.509766),
 }
 
-local PepsisWorld = library:CreateWindow({
-    Name = "Lifea's Teleport Premium",
-    Themeable = {
-        Info = "Discord Server: qs8brntYrN"
-    }
-})
+ -- Create main window
+    local Window = Library:CreateWindow({
+        Name = "Lifea's Premium Teleport",
+        Themeable = {
+            Info = 'By Lifea',
+            Credit = True, -- Shows library 
+        },
+        Background = "rbxassetid://18239728064",
+        Theme = [[{
+            "__Designer.Colors.topGradient":"1C1C1C",
+            "__Designer.Colors.section":"8400FF",
+            "__Designer.Colors.hoveredOptionBottom":"8400FF",
+            "__Designer.Background.ImageAssetID":"rbxassetid://285099811",
+            "__Designer.Colors.selectedOption":"8400FF",
+            "__Designer.Colors.unselectedOption":"4D4D4D",
+            "__Designer.Files.WorkspaceFile":"South bronx Corn.wtf", 
+            "__Designer.Colors.unhoveredOptionTop":"1C1C1C",
+            "__Designer.Colors.outerBorder":"000000",
+            "__Designer.Background.ImageColor":"FF008C",
+            "__Designer.Colors.tabText":"FFFFFF",
+            "__Designer.Colors.elementBorder":"000000",
+            "__Designer.Background.ImageTransparency":85, 
+            "__Designer.Colors.background":"1A1A1A",
+            "__Designer.Colors.innerBorder":"1C1C1C",
+            "__Designer.Colors.bottomGradient":"1C1C1C",
+            "__Designer.Colors.sectionBackground":"1C1C1C",
+            "__Designer.Colors.hoveredOptionTop":"8400FF",
+            "__Designer.Colors.otherElementText":"FF008C",
+            "__Designer.Colors.main":"8400FF",
+            "__Designer.Colors.elementText":"FFFFFF",
+            "__Designer.Colors.unhoveredOptionBottom":"1C1C1C",
+            "__Designer.Background.UseBackgroundImage":false
+        }]]
+    })
 
-local GeneralTab = PepsisWorld:CreateTab({
+
+local GeneralTab = Window:CreateTab({
     Name = "General"
 })
 
 local TeleportSection = GeneralTab:CreateSection({
-    Name = "Misc",
-    Side = "Left"
+    Name = '|Misc|',
+    Side = 'Left'
 })
+
+
 
 local selectedLocation = "GunShop"
 local teleporting = false
@@ -215,9 +254,77 @@ local teleportTimeout = 20 -- seconds
 local shineTween = nil
 local titleGlowTween = nil
 local loadingPulseTween = nil
+local bloodDisabled = false
+local soundDisabled = false
+
+-- Add this function at the top with other utility functions
+local function lookAtHomelessUpperTorso()
+    while teleporting do
+        local homelessFolder = workspace:FindFirstChild("HomelessPeople")
+        if homelessFolder then
+            for _, model in ipairs(homelessFolder:GetChildren()) do
+                if model:IsA("Model") then
+                    local upperTorso = model:FindFirstChild("UpperTorso")
+                    if upperTorso then
+                        -- Make camera look at the UpperTorso
+                        camera.CFrame = CFrame.new(camera.CFrame.Position, upperTorso.Position)
+                        break
+                    end
+                end
+            end
+        end
+        task.wait()
+    end
+end
+
+local function teleportCharacter(targetCFrame)
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    
+    -- Get all parts that should be teleported
+    local partsToTeleport = {}
+    local rootPart = character.HumanoidRootPart
+    
+    -- Include all character parts and accessories
+    for _, part in ipairs(character:GetDescendants()) do
+        if part:IsA("BasePart") and part ~= rootPart then
+            table.insert(partsToTeleport, part)
+        end
+    end
+    
+    -- Temporarily weld all parts to the root part
+    local welds = {}
+    for _, part in ipairs(partsToTeleport) do
+        local weld = Instance.new("WeldConstraint")
+        weld.Part0 = rootPart
+        weld.Part1 = part
+        weld.Parent = part
+        table.insert(welds, weld)
+    end
+    
+    -- Teleport the root part (this should bring all welded parts)
+    rootPart.CFrame = targetCFrame
+    
+    -- Wait for physics to catch up
+    RunService.Heartbeat:Wait()
+    RunService.Heartbeat:Wait()
+    
+    -- Clean up the temporary welds
+    for _, weld in ipairs(welds) do
+        weld:Destroy()
+    end
+    
+
+
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+    end
+end
 
 -- Kan efektlerini kalıcı olarak devre dışı bırak
 local function disableBloodEffectsPermanently()
+    if bloodDisabled then return end
+    
     local playerGui = player:FindFirstChild("PlayerGui")
     if not playerGui then return end
     
@@ -240,10 +347,14 @@ local function disableBloodEffectsPermanently()
             end
         end
     end
+    
+    bloodDisabled = true
 end
 
 -- Knockout sesini devre dışı bırak
 local function disableKnockoutSound()
+    if soundDisabled then return end
+    
     local playerScripts = player:FindFirstChild("PlayerScripts")
     if playerScripts then
         local main = playerScripts:FindFirstChild("Main")
@@ -257,13 +368,16 @@ local function disableKnockoutSound()
             end
         end
     end
+    
+    soundDisabled = true
 end
 
 -- Knockout sesini tekrar aç
 local function enableKnockoutSound()
-    if knockoutSound then
+    if knockoutSound and soundDisabled then
         knockoutSound.Volume = 1
         knockoutSound = nil
+        soundDisabled = false
     end
 end
 
@@ -283,11 +397,30 @@ TeleportSection:AddDropdown({
     Flag = 'selected_location',
     Multi = false,
     List = {
-        'GunShop', 'Lamont', 'Cardealer', 'MexicanDeli', 'Potato', 'BoxJob', 
-        'Casino', 'Garage', 'Tattoo', 'Shoe', 'JunkBuyer', 'Safezone',
-        'Gun Store 2', 'Garbage Job', 'Bank', 'Studio', 'Police Station',
-        'Cosmic Cuts', "Pluto's Headwear", "B&b (Glasses Store)", "Kevins Drip",
-        "Apartments 1", "Apartments 2", "Apartments 3"
+           'Apartments 1', 
+    'Apartments 2', 
+    'Apartments 3',
+    'B&b (Glasses Store)',
+    'Bank',
+    'BoxJob',
+    'Cardealer',
+    'Casino',
+    'Cosmic Cuts',
+    'Garage',
+    'Garbage Job',
+    'Gun Store 2',
+    'GunShop',
+    'JunkBuyer',
+    'Kevins Drip',
+    'Lamont',
+    'MexicanDeli',
+    "Pluto's Headwear",
+    'Police Station',
+    'Potato',
+    'Safezone',
+    'Shoe',
+    'Studio',
+    'Tattoo'
     },
     Callback = function(selection)
         selectedLocation = selection
@@ -298,7 +431,7 @@ local function getRandomHomelessModel()
     local homelessFolder = workspace:FindFirstChild("HomelessPeople")
     if not homelessFolder then 
         if character and character:FindFirstChild("HumanoidRootPart") then
-            character.HumanoidRootPart.CFrame = locations.Backup
+            teleportCharacter(locations.Backup)
         end
         return nil 
     end
@@ -314,32 +447,41 @@ local function getRandomHomelessModel()
         return models[math.random(1, #models)]
     else
         if character and character:FindFirstChild("HumanoidRootPart") then
-            character.HumanoidRootPart.CFrame = locations.Backup
+            teleportCharacter(locations.Backup)
         end
         return nil
     end
 end
 
--- Animasyon fonksiyonları
 local function startAnimations()
-    -- Crown shine rotation animation
+    -- Reset all animations first
     if shineTween then shineTween:Cancel() end
+    if titleGlowTween then titleGlowTween:Cancel() end
+    if loadingPulseTween then loadingPulseTween:Cancel() end
+    
+    -- Reset properties to initial state
+    loading.Text = "Teleporting..."
+    loading.TextColor3 = Color3.fromRGB(255, 255, 255)
+    loading.TextSize = 22
+    shine.Rotation = -45
+    titleGlow.Offset = Vector2.new(0, 0)
+
+    -- Crown shine rotation animation
     shineTween = TweenService:Create(shine, TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {
         Rotation = 45
     })
     shineTween:Play()
     
     -- Title glow animation
-    if titleGlowTween then titleGlowTween:Cancel() end
     titleGlowTween = TweenService:Create(titleGlow, TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {
         Offset = Vector2.new(1, 0)
     })
     titleGlowTween:Play()
     
     -- Loading text pulse animation
-    if loadingPulseTween then loadingPulseTween:Cancel() end
-    
     local function pulseLoading()
+        if not loading or not loading.Parent then return end
+        
         local pulseIn = TweenService:Create(loading, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
             TextSize = 26
         })
@@ -350,29 +492,37 @@ local function startAnimations()
         
         pulseIn:Play()
         pulseIn.Completed:Connect(function()
-            pulseOut:Play()
-            pulseOut.Completed:Connect(function()
-                if loading.Text == "Teleporting..." then
-                    pulseLoading()
-                end
-            end)
+            if loading and loading.Parent and loading.Text == "Teleporting..." then
+                pulseOut:Play()
+                pulseOut.Completed:Connect(function()
+                    if loading and loading.Parent and loading.Text == "Teleporting..." then
+                        pulseLoading()
+                    end
+                end)
+            end
         end)
     end
     
     pulseLoading()
 end
 
-local function animateTeleportComplete()
-    -- Change loading text and animate
-    loading.Text = "Teleport Completed!"
+local function animateTeleportComplete(success)
+    if not frame or not frame.Parent then return end
     
-    -- Success color animation
-    local successColor = TweenService:Create(loading, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        TextColor3 = Color3.fromRGB(100, 255, 100)
-    })
+    -- Stop previous animations
+    if loadingPulseTween then loadingPulseTween:Cancel() end
     
-    local returnColor = TweenService:Create(loading, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 1), {
-        TextColor3 = Color3.fromRGB(255, 255, 255)
+    if success then
+        loading.Text = "Teleport Completed!"
+        loading.TextColor3 = Color3.fromRGB(100, 255, 100)
+    else
+        loading.Text = "Teleport Failed! (Dont Worry If its ATM...)"
+        loading.TextColor3 = Color3.fromRGB(255, 100, 100)
+    end
+    
+    -- Success/Fail color animation
+    local colorTween = TweenService:Create(loading, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        TextColor3 = success and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 100, 100)
     })
     
     -- Pulse animation for completion
@@ -384,178 +534,860 @@ local function animateTeleportComplete()
         TextSize = 24
     })
     
-    successColor:Play()
-    successColor.Completed:Connect(function()
+    colorTween:Play()
+    colorTween.Completed:Connect(function()
         completePulseIn:Play()
         completePulseIn.Completed:Connect(function()
             completePulseOut:Play()
             completePulseOut.Completed:Connect(function()
-                returnColor:Play()
+                -- 6 second delay before hiding GUI (increased from 2)
+                task.delay(6, function()
+                    if frame and frame.Parent then
+                        frame.Visible = false
+                        -- Re-enable sounds and blood effects after teleport completes
+                        enableKnockoutSound()
+                        bloodDisabled = false
+                    end
+                end)
             end)
         end)
     end)
 end
 
-local function triggerProximityPrompt(npcModel)
-    local upperTorso = npcModel:FindFirstChild("UpperTorso")
-    if not upperTorso then return end
-    
-    -- Kamerayı direkt olarak UpperTorso'ya yönlendir
-    camera.CFrame = CFrame.lookAt(camera.CFrame.Position, upperTorso.Position)
-    
-    local prompt = upperTorso:FindFirstChildOfClass("ProximityPrompt")
-    if not prompt then return end
-    
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not humanoid then return end
-    
-    if connection then
-        connection:Disconnect()
-    end
-    
-    -- Animasyonları başlat
-    startAnimations()
-    
-    connection = RunService.Heartbeat:Connect(function()
-        if humanoid.Health > 10 then
-            fireproximityprompt(prompt)
-            humanoid.Health = humanoid.Health - 0.0
-            -- Kamerayı sürekli UpperTorso'ya yönlendir
-            camera.CFrame = CFrame.lookAt(camera.CFrame.Position, upperTorso.Position)
-        else
-            connection:Disconnect()
-            if character:FindFirstChild("HumanoidRootPart") then
-                character.HumanoidRootPart.CFrame = locations[selectedLocation] or locations.Default
-                arrivalTime = tick()
-                destinationText.Text = "Arrived at: "..selectedLocation
-                animateTeleportComplete()
-            end
-        end
-    end)
-end
-
-local function checkAndTeleportToHomeless()
-    local npcModel = getRandomHomelessModel()
-    
-    -- Special handling for Backup location - keep teleporting until HomelessPeople is found
-    if selectedLocation == "Backup" then
-        while not npcModel do
-            wait(0.0)
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                character.HumanoidRootPart.CFrame = locations.Backup
-            end
-            npcModel = getRandomHomelessModel()
-        end
-    else
-        while not npcModel do
-            wait(0.0)
-            npcModel = getRandomHomelessModel()
-        end
-    end
-    
-    local npcRoot = npcModel:FindFirstChild("HumanoidRootPart")
-    if not npcRoot then return end
-    
-    if character:FindFirstChild("HumanoidRootPart") then
-        character.HumanoidRootPart.CFrame = npcRoot.CFrame * CFrame.new(0, 0, -2)
-    end
-    
-    triggerProximityPrompt(npcModel)
-end
-
-local function checkArrival()
-    if not arrivalTime then return false end
-    if tick() - arrivalTime >= 5 then
-        arrivalTime = nil
-        return true
-    end
-    return false
-end
-
-spawn(function()
-    while true do
-        if frame.Visible and checkArrival() then
-            frame.Visible = false
-            loading.Text = "Teleporting..."
-            destinationText.Text = ""
-            enableKnockoutSound()
-            soundConnection = nil
-            
-            -- Animasyonları durdur
-            if shineTween then shineTween:Cancel() end
-            if titleGlowTween then titleGlowTween:Cancel() end
-            if loadingPulseTween then loadingPulseTween:Cancel() end
-        end
-        wait(0.1)
-    end
-end)
-
+-- Modify the startTeleportProcess function to include the camera control
 local function startTeleportProcess()
-    if teleporting then return end
+    if teleporting then 
+        Library.Notify({Text = "Teleport already in progress", Duration = 2})
+        return 
+    end
     teleporting = true
     
-    frame.Visible = true
-    disableKnockoutSound()
+    -- Start the camera control coroutine
+    spawn(lookAtHomelessUpperTorso)
+    
+    -- Rest of the existing teleport process code...
     disableBloodEffectsPermanently()
+    disableKnockoutSound()
+    
+    -- Reset GUI state
+    frame.Visible = true
+    frame.Transparency = 1
+    loading.Text = "Teleporting..."
     destinationText.Text = "Destination: "..selectedLocation
-
-    -- Animasyonları başlat
+    
+    -- Start animations
     startAnimations()
-
-    local teleportStartTime = tick()
-    local timeoutReached = false
     
-    local timeoutConnection
-    timeoutConnection = RunService.Heartbeat:Connect(function()
-        if tick() - teleportStartTime >= teleportTimeout then
-            timeoutReached = true
-            frame.Visible = false
-            loading.Text = "Teleporting..."
-            destinationText.Text = ""
-            enableKnockoutSound()
-            
-            if timeoutConnection then
-                timeoutConnection:Disconnect()
-            end
-            if connection then
-                connection:Disconnect()
-            end
-            teleporting = false
-            library:Notify("Teleport timed out after "..teleportTimeout.." seconds", 5)
-            
-            -- Animasyonları durdur
-            if shineTween then shineTween:Cancel() end
-            if titleGlowTween then titleGlowTween:Cancel() end
-            if loadingPulseTween then loadingPulseTween:Cancel() end
-        end
-    end)
-
-    spawn(function() 
-        checkAndTeleportToHomeless()
+    spawn(function()
+        local teleportSuccess = false
+        local startTime = tick()
         
-        while not timeoutReached do
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                local currentPos = character.HumanoidRootPart.Position
-                local targetPos = locations[selectedLocation].Position
-                if (currentPos - targetPos).Magnitude < 10 then
-                    break
+        -- Try to teleport
+        local success, err = pcall(function()
+            -- Step 1: Find a homeless NPC
+            local homelessModel = getRandomHomelessModel()
+            
+            while teleporting and humanoid and humanoid.Health > 10 and (tick() - startTime) < teleportTimeout do
+                if not homelessModel or not homelessModel.Parent then
+                    homelessModel = getRandomHomelessModel()
                 end
+                
+                if homelessModel then
+                    local upperTorso = homelessModel:FindFirstChild("UpperTorso")
+                    if upperTorso then
+                        -- Position character in front of homeless
+                        teleportCharacter(upperTorso.CFrame * CFrame.new(0, 0, -2))
+                        
+                        -- Trigger proximity prompt
+                        local prompt = upperTorso:FindFirstChildOfClass("ProximityPrompt")
+                        if prompt then
+                            fireproximityprompt(prompt)
+                        end
+                    end
+                else
+                    -- No homeless found, teleport to backup location
+                    teleportCharacter(locations.Backup)
+                end
+                
+                RunService.Heartbeat:Wait()
             end
-            wait(0.1)
+            
+            -- Step 2: Teleport to destination if still teleporting
+            if teleporting and character and character:FindFirstChild("HumanoidRootPart") then
+                teleportCharacter(locations[selectedLocation] or locations.Default)
+                arrivalTime = tick()
+                destinationText.Text = "Arrived at: "..selectedLocation
+                teleportSuccess = true
+            end
+        end)
+        
+        -- Handle results
+        if not success then
+            warn("Teleport error: " .. tostring(err))
+            teleportSuccess = false
         end
-          
-        if not timeoutReached and timeoutConnection then
-            timeoutConnection:Disconnect()
-        end
+        
+        -- Animate completion
+        animateTeleportComplete(teleportSuccess)
+        teleporting = false -- This will stop the lookAtHomelessUpperTorso loop
     end)
-    
-    teleporting = false
 end
 
 TeleportSection:AddButton({
     Name = 'Start Teleport Process',
     Callback = startTeleportProcess
 })
+
+
+
+-- Auto Farm Section
+local AutoFarmTab = Window:CreateTab({
+    Name = "|Auto Farm|"
+})
+
+local AutoFarmSection = AutoFarmTab:CreateSection({
+    Name = "|Auto Farm Settings|",
+    Side = "Left"
+})
+
+
+
+
+local autoFarming = false
+local currentStep = 0
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local VirtualInput = game:GetService("VirtualInputManager")
+
+-- Improved Fake ID check and equip system
+local function equipFakeID(shouldEquip)
+    local character = LocalPlayer.Character
+    if not character then return false end
+    
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return false end
+    
+    -- First check if already equipped
+    for _, tool in ipairs(character:GetChildren()) do
+        if tool:IsA("Tool") and (tool.Name:lower():find("fake") and tool.Name:lower():find("id")) then
+            if not shouldEquip then
+                humanoid:UnequipTools()
+            else
+                humanoid:EquipTool(tool)
+            end
+            return shouldEquip
+        end
+    end
+    
+    -- If we need to equip, check backpack
+    if shouldEquip then
+        local backpack = LocalPlayer:FindFirstChild("Backpack")
+        if backpack then
+            for _, tool in ipairs(backpack:GetChildren()) do
+                if tool:IsA("Tool") and (tool.Name:lower():find("fake") and tool.Name:lower():find("id")) then
+                    humanoid:EquipTool(tool)
+                    return true
+                end
+            end
+        end
+    end
+    
+    return false
+end
+
+-- Connect character added event
+LocalPlayer.CharacterAdded:Connect(function(character)
+    if autoFarming then
+        task.wait(1) -- Give time for tools to load
+        -- Only equip if we're on step 2 (Bank Teller) or toggle is on
+        equipFakeID(currentStep == 2 or (fakeIDToggle and fakeIDToggle.CurrentValue))
+    end
+end)
+
+local function hasFakeID()
+    -- Check character first
+    local character = LocalPlayer.Character
+    if character then
+        for _, tool in ipairs(character:GetChildren()) do
+            if tool:IsA("Tool") and (tool.Name:lower():find("fake") and tool.Name:lower():find("id")) then
+                return true
+            end
+        end
+    end
+    
+    -- Check backpack
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if backpack then
+        for _, tool in ipairs(backpack:GetChildren()) do
+            if tool:IsA("Tool") and (tool.Name:lower():find("fake") and tool.Name:lower():find("id")) then
+                return true
+            end
+        end
+    end
+    
+    return false
+end
+
+local function findNPC(npcName)
+    local NPCs = workspace:FindFirstChild("NPCs")
+    if not NPCs then return nil end
+    
+    -- Try exact match first
+    local npc = NPCs:FindFirstChild(npcName)
+    if npc then return npc end
+    
+    -- Try case-insensitive partial match
+    for _, child in ipairs(NPCs:GetChildren()) do
+        if child.Name:lower():find(npcName:lower()) then
+            return child
+        end
+    end
+    
+    return nil
+end
+
+local function triggerProximityPrompt(npcName)
+    local npc = findNPC(npcName)
+    if not npc then return false end
+
+    local upperTorso = npc:FindFirstChild("UpperTorso") or npc:FindFirstChild("Torso")
+    if not upperTorso then return false end
+    
+    -- Find the proximity prompt
+    local prompt = upperTorso:FindFirstChildOfClass("ProximityPrompt")
+    if not prompt then
+        local attachment = upperTorso:FindFirstChild("Attachment")
+        if attachment then
+            prompt = attachment:FindFirstChildOfClass("ProximityPrompt")
+        end
+    end
+
+    local promptblank = part:FindFirstChildOfClass("ProximityPrompt")
+    if not prompt then
+        local attachment = part:FindFirstChild("Attachment")
+        if attachment then
+            prompt = attachment:FindFirstChildOfClass("ProximityPrompt")
+        end
+    end
+    
+    if not prompt then return false end
+    if not promptblank then return false end
+    
+    -- Position character in front of NPC
+    local character = LocalPlayer.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local npcRoot = npc:FindFirstChild("HumanoidRootPart") or upperTorso
+        character.HumanoidRootPart.CFrame = npcRoot.CFrame * CFrame.new(0, 0, -3)
+    end
+    
+    -- Spam the prompt
+    for i = 1, 10 do
+        fireproximityprompt(prompt)
+        task.wait(0.05)
+    end
+    
+    return true
+end
+
+local function buyFakeID()
+    -- First try the remote if it exists
+    if ReplicatedStorage:FindFirstChild("BuyFakeID") then
+        for i = 1, 3 do
+            ReplicatedStorage.BuyFakeID:FireServer()
+            task.wait(0.5)
+            if hasFakeID() then 
+                equipFakeID(currentStep == 2 or (fakeIDToggle and fakeIDToggle.CurrentValue))
+                return true 
+            end
+        end
+    end
+    
+
+    
+    -- Improved proximity spam approach
+    selectedLocation = "FakeIDSeller"
+    startTeleportProcess()
+    
+    -- Wait for teleport to complete
+    local startTime = tick()
+    while frame and frame.Visible and autoFarming and (tick() - startTime) < 10 do
+        task.wait(0.1)
+    end
+    if not autoFarming then return false end
+    
+    Library.Notify({
+        Text = 'Attempting to buy Fake ID...', 
+        Duration = 3
+    })
+    
+    -- Find the NPC and get close
+    local npc = findNPC("FakeIDSeller")
+    if not npc then return false end
+    
+    local upperTorso = npc:FindFirstChild("UpperTorso") or npc:FindFirstChild("Torso")
+    if not upperTorso then return false end
+    
+    -- Position character in front of NPC
+    local character = LocalPlayer.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = upperTorso.CFrame * CFrame.new(0, 0, -2)
+    end
+    
+    -- Improved proximity spam
+    local prompt = upperTorso:FindFirstChildOfClass("ProximityPrompt")
+    if not prompt then
+        -- Check attachments if prompt not directly on torso
+        for _, child in ipairs(upperTorso:GetDescendants()) do
+            if child:IsA("ProximityPrompt") then
+                prompt = child
+                break
+            end
+        end
+    end
+    
+    if prompt then
+        for i = 1, 20 do
+            if not autoFarming then break end
+            fireproximityprompt(prompt)
+            task.wait(0.1)
+        end
+    end
+    
+    -- Final check if we got the ID
+    if hasFakeID() then
+        equipFakeID(currentStep == 2 or (fakeIDToggle and fakeIDToggle.CurrentValue))
+        return true
+    end
+    
+    return false
+end
+
+local function pressEKey()
+    for i = 1, 15 do
+        VirtualInput:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+        task.wait(0.05)
+        VirtualInput:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+        task.wait(0.05)
+    end
+end
+
+local function completeFarmCycle()
+    -- STEP 1: Get FakeID if needed
+    currentStep = 1
+    if not hasFakeID() then
+        Library.Notify({
+            Text = 'Getting Fake ID...', 
+            Duration = 3
+        })
+        
+        if not buyFakeID() then
+            Library.Notify({
+                Text = 'Failed to get Fake ID', 
+                Duration = 3
+            })
+            return false
+        end
+    end
+    
+    -- STEP 2: Bank Teller (only equip FakeID here unless toggle is on)
+
+    currentStep = 2
+    Library.Notify({
+        Text = 'Going to Bank Teller...', 
+        Duration = 3
+    })
+    
+    equipFakeID(currentStep == 2 or (fakeIDToggle and fakeIDToggle.CurrentValue))
+    selectedLocation = "BankTeller"
+    startTeleportProcess()
+    
+    -- Wait for teleport to complete with timeout
+    local startTime = tick()
+    while frame and frame.Visible and autoFarming and (tick() - startTime) < 15 do
+        task.wait(0.1)
+    end
+    
+    if not autoFarming then return false end
+    
+    -- Improved Bank Teller interaction
+    local npc = findNPC("Bank Teller") or findNPC("Teller")
+    if npc then
+        local upperTorso = npc:FindFirstChild("UpperTorso") or npc:FindFirstChild("Torso")
+        if upperTorso then
+            -- Position character properly
+            local character = LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                character.HumanoidRootPart.CFrame = upperTorso.CFrame * CFrame.new(0, 0, -2.5)
+            end
+            
+            -- Find and trigger prompt
+            local prompt = upperTorso:FindFirstChildOfClass("ProximityPrompt")
+            if not prompt then
+                for _, child in ipairs(upperTorso:GetDescendants()) do
+                    if child:IsA("ProximityPrompt") then
+                        prompt = child
+                        break
+                    end
+                end
+            end
+            
+            if prompt then
+                for i = 1, 15 do
+                    if not autoFarming then break end
+                    fireproximityprompt(prompt)
+                    task.wait(0.1)
+                end
+            end
+        end
+    end
+    
+    task.wait(45)
+    
+    -- STEP 3: Final Position (unequip FakeID unless toggle is on)
+    currentStep = 3
+    Library.Notify({
+        Text = 'Going to Bank Final Position...', 
+        Duration = 3
+    })
+    
+    equipFakeID(fakeIDToggle and fakeIDToggle.CurrentValue or false)
+    selectedLocation = "FinalPosition"
+    startTeleportProcess()
+    
+    -- Wait for teleport to complete with timeout
+    startTime = tick()
+    while frame and frame.Visible and autoFarming and (tick() - startTime) < 39 do
+        task.wait(0.1)
+    end
+    
+    if not autoFarming then return false end
+    
+    -- Improved proximity spam
+    local promptblank = part:FindFirstChildOfClass("ProximityPrompt")
+    if not prompt then
+        -- Check attachments if prompt not directly on torso
+        for _, child in ipairs(part:GetDescendants()) do
+            if child:IsA("ProximityPrompt") then
+                prompt = child
+                break
+            end
+        end
+    end
+    
+    
+    -- Close GUI after teleport
+    if frame then
+        frame.Visible = false
+    end
+    
+    return true
+end
+
+
+
+local fakeIDLoopRunning = false
+
+-- Toggle oluşturma
+local fakeIDToggle = AutoFarmSection:CreateToggle({
+    Name = "Keep Fake ID Equipped",
+    CurrentValue = false,
+    Flag = "FakeIDToggle",
+    Callback = function(value)
+        if value then
+            -- Toggle açıldığında döngüyü başlat
+            fakeIDLoopRunning = true
+            spawn(function()
+                while fakeIDLoopRunning do
+                    equipFakeID(true)
+                    task.wait(1) -- Her saniye kontrol et
+                end
+            end)
+        else
+            -- Toggle kapatıldığında döngüyü durdur
+            fakeIDLoopRunning = false
+        end
+    end
+})
+
+
+local function startAutoFarm()
+    autoFarming = true
+    
+    while autoFarming do
+        local success, result = pcall(completeFarmCycle)
+        
+        if not success then
+           Library.Notify({
+                Text = 'Error in farm cycle: ' .. tostring(result),
+                Duration = 5
+            })
+        end
+        
+        -- Small delay between cycles if still farming
+        if autoFarming then
+            task.wait(2)
+        end
+    end
+end
+AutoFarmSection:AddToggle({
+    Name = 'Enable Auto Farm',
+    Value = false,
+    Flag = 'auto_farm_toggle',
+    Callback = function(state)
+        if state then
+          Library.Notify({
+    Text = 'Auto Farm Started', 
+    Duration = 3  -- Seconds
+})
+    
+            spawn(startAutoFarm)
+        else
+            autoFarming = false
+            currentStep = 0
+                        Library.Notify({
+    Text = 'Auto Farm Stopped', 
+    Duration = 3  -- Seconds
+})
+    
+        end
+    end
+})
+
+
+AutoFarmSection:AddButton({
+    Name = "Interact with Active ATM",
+    Callback = function()
+        -- Store current location to restore after ATM interaction
+        local currentLocation = selectedLocation
+        
+        -- Define ATM locations
+        local ATMS = {
+            {name = "ATM1", cframe = CFrame.new(-33.1487, 3.7370, -299.5453), path = "ATM1"},
+            {name = "ATM2", cframe = CFrame.new(538.4818, 3.7371, -349.0415), path = "ATM2"},
+            {name = "ATM3", cframe = CFrame.new(497.8156, 3.7839, 405.5681), path = "ATM3"},
+            {name = "ATM4", cframe = CFrame.new(236.1748, 3.1180, -165.3973), path = "ATM4"},
+            {name = "ATM5", cframe = CFrame.new(-652.0219, 4.2857, 155.1690), path = "ATM5"},
+            {name = "ATM6", cframe = CFrame.new(-455.1304, 4.3107, 370.8311), path = "ATM6"},
+            {name = "ATM7", cframe = CFrame.new(-266.3022, 4.4058, -212.2364), path = "ATM7"},
+            {name = "ATM8", cframe = CFrame.new(-10.4940, 3.7371, 233.9844), path = "ATM8"},
+            {name = "ATM9", cframe = CFrame.new(717.0417, 3.8176, 413.7101), path = "ATM9"},
+            {name = "ATM10", cframe = CFrame.new(-536.8209, 4.2857, -20.3541), path = "ATM10"},
+            {name = "ATM11", cframe = CFrame.new(-652.021, 4.285, 155.169), path = "ATM11"},
+            {name = "ATM12", cframe = CFrame.new(714.4320, 4.2857, -240.3657), path = "ATM12"},
+            {name = "ATM13", cframe = CFrame.new(-314.9244, 3.8715, 145.9376), path = "ATM13"},
+            {name = "ATM14", cframe = CFrame.new(-377.9388, 4.3107, -359.7116), path = "ATM14"},
+            {name = "ATM15", cframe = CFrame.new(360.0960, 3.7371, -359.4165), path = "ATM15"},
+        }
+
+        -- Find and interact with first available ATM
+        for _, atm in ipairs(ATMS) do
+            local atmPath = workspace:FindFirstChild("Map"):FindFirstChild("ATMS"):FindFirstChild(atm.path)
+            if atmPath and atmPath:FindFirstChild("Attachment") then
+                local proximityPrompt = atmPath.Attachment:FindFirstChild("ProximityPrompt")
+                if proximityPrompt and proximityPrompt.Enabled then
+                    -- Use premium teleport system to go to ATM
+                    local tempLocation = atm.name
+                    local tempCFrame = atm.cframe
+                    
+                    -- Start teleport process with custom callback
+                    frame.Visible = true
+                    frame.Transparency = 1
+                    disableKnockoutSound()
+                    disableBloodEffectsPermanently()
+                    destinationText.Text = "Destination: Active ATM"
+                    startAnimations()
+                    
+                    -- Find a homeless NPC (part of the premium teleport process)
+                    local homelessModel = getRandomHomelessModel()
+                    local startTime = tick()
+                    
+                    while humanoid and humanoid.Health > 10 and (tick() - startTime) < teleportTimeout do
+                        if not homelessModel or not homelessModel.Parent then
+                            homelessModel = getRandomHomelessModel()
+                        end
+                        
+                        if homelessModel then
+                            local upperTorso = homelessModel:FindFirstChild("UpperTorso")
+                            if upperTorso then
+                                -- Position character in front of homeless
+                                teleportCharacter(upperTorso.CFrame * CFrame.new(0, 0, -2))
+                                
+                                -- Trigger proximity prompt
+                                local prompt = upperTorso:FindFirstChildOfClass("ProximityPrompt")
+                                if prompt then
+                                    fireproximityprompt(prompt)
+                                end
+                            end
+                        else
+                            -- No homeless found, teleport to backup location
+                            teleportCharacter(locations.Backup)
+                        end
+                        
+                        RunService.Heartbeat:Wait()
+                    end
+                    
+                    -- Teleport to ATM location
+                    teleportCharacter(tempCFrame)
+                    
+                    -- Position camera properly
+                    local cameraOffset = Vector3.new(0, 5, -10) 
+                    camera.CFrame = CFrame.new(character.HumanoidRootPart.Position + cameraOffset, tempCFrame.Position)
+                    
+                    -- Trigger the proximity prompt
+                    task.wait(0.2)
+                    fireproximityprompt(proximityPrompt, 1, true)
+                    
+                    -- Complete animation
+                    destinationText.Text = "ATM Interaction Complete"
+                    animateTeleportComplete()
+                    
+                    -- Restore original location
+                    selectedLocation = currentLocation
+                    return
+                end
+            end
+        end
+        
+        -- If no ATM found
+        Library.Notify({
+            Text = "No active ATM found",
+            Duration = 3
+        })
+        
+        -- Restore original location
+        selectedLocation = currentLocation
+    end
+})
+
+AutoFarmSection:AddSlider({
+    Name = "Farm Quantity",
+    Flag = "farm_quantity",
+    Min = 1,
+    Max = 10,
+    Default = 1,
+    Increment = 1,
+ Callback = function(isDragging, value)
+        if not isDragging then
+            farmQuantity = math.floor(value)  -- Ensure it's a whole number
+        end
+    end
+})
+
+
+AutoFarmSection:AddToggle({
+    Name = 'Enable Auto Farm',
+    Value = false,
+    Flag = 'auto_farm_toggle1',
+    Callback = function(state)
+        autoFarmEnabled = state
+        if state then
+            autoFarmThread = task.spawn(function()
+                local Players = game:GetService("Players")
+                local player = Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local humanoid = character:WaitForChild("Humanoid")
+                local rootPart = character:WaitForChild("HumanoidRootPart")
+                local backpack = player:WaitForChild("Backpack")
+                
+                -- Ensure farmQuantity is a whole number
+                farmQuantity = math.floor(farmQuantity or 1)
+                
+                humanoid.WalkSpeed = 20
+
+                local positions = {
+                    first = Vector3.new(-477.865, 3.862, -436.198),
+                    second = Vector3.new(-462.933, 3.862, -448.099),
+                    third = Vector3.new(-463.217, 3.862, -473.068),
+                    fourth = Vector3.new(-466.3665466308594, 4.002470016479492, -499.2865295410156),
+                    fifth = Vector3.new(-463.075, 3.862, -522.546),
+                    sixth = Vector3.new(-466.3665466308594, 4.002470016479492, -499.2865295410156),
+                    seventh = Vector3.new(-497.025, 3.862, -451.890)
+                }
+
+                local function pressE(duration)
+                    local vim = game:GetService("VirtualInputManager")
+                    vim:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+                    task.wait(duration)
+                    vim:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                end
+
+                local function moveToSpam(pos, threshold)
+                    humanoid:MoveTo(pos)
+                    while autoFarmEnabled and (rootPart.Position - pos).Magnitude > threshold do
+                        humanoid:MoveTo(pos)
+                        task.wait(0.2)
+                    end
+                end
+
+                local function equipTool(toolName)
+                    for _, item in ipairs(backpack:GetChildren()) do
+                        if item.Name == toolName then
+                            item.Parent = character
+                            break
+                        end
+                    end
+                end
+
+                local function checkInventory()
+                    local flourCount = 0
+                    local potatoCount = 0
+                    
+                    -- Check backpack
+                    for _, item in ipairs(backpack:GetChildren()) do
+                        if item.Name == "Flour" then
+                            flourCount = flourCount + 1
+                        elseif item.Name == "Potato" then
+                            potatoCount = potatoCount + 1
+                        end
+                    end
+                    
+                    -- Check character
+                    if character then
+                        for _, item in ipairs(character:GetChildren()) do
+                            if item.Name == "Flour" then
+                                flourCount = flourCount + 1
+                            elseif item.Name == "Potato" then
+                                potatoCount = potatoCount + 1
+                            end
+                        end
+                    end
+                    
+                    return flourCount >= farmQuantity and potatoCount >= farmQuantity
+                end
+
+                local function purchaseItems()
+                    -- First teleport to MexicanDeli to purchase items
+                    selectedLocation = "MexicanDeli"
+                    startTeleportProcess()
+                    
+                    -- Wait for teleport to complete
+                    local startTime = tick()
+                    while frame and frame.Visible and autoFarmEnabled and (tick() - startTime) < 15 do
+                        task.wait(0.1)
+                    end
+                    
+                    if not autoFarmEnabled then return false end
+                    
+                    -- Purchase exactly the amount specified in farmQuantity
+                    Library.Notify({
+                        Text = 'Purchasing '..farmQuantity..' of each material',
+                        Duration = 3
+                    })
+                    
+                    -- Purchase Potatoes
+                    for i = 1, farmQuantity do
+                        game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StorePurchase"):FireServer("Potato")
+                        task.wait(0.5)
+                    end
+                    
+                    -- Purchase Flour
+                    for i = 1, farmQuantity do
+                        game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StorePurchase"):FireServer("Flour")
+                        task.wait(0.5)
+                    end
+                    
+                    -- Teleport back to Potato location
+                    selectedLocation = "Potato"
+                    startTeleportProcess()
+                    
+                    -- Wait for teleport to complete
+                    startTime = tick()
+                    while frame and frame.Visible and autoFarmEnabled and (tick() - startTime) < 15 do
+                        task.wait(0.1)
+                    end
+                    
+                    return true
+                end
+
+                while autoFarmEnabled do
+                    -- Check inventory and purchase if needed
+                    if not checkInventory() then
+
+                        
+                        if not purchaseItems() then
+                            Library.Notify({
+                                Text = 'Failed to purchase materials',
+                                Duration = 3
+                            })
+                            task.wait(5)
+                            continue
+                        end
+                    end
+
+                    -- First position
+                    moveToSpam(positions.first, 3)
+                    if not autoFarmEnabled then break end
+                    pressE(1)
+                    task.wait(1)
+
+                    -- Second position (Potato)
+                    moveToSpam(positions.second, 3)
+                    if not autoFarmEnabled then break end
+                    equipTool("Potato")
+                    pressE(3)
+                    task.wait(1)
+
+                    -- Third position
+                    moveToSpam(positions.third, 3)
+                    if not autoFarmEnabled then break end
+                    pressE(4)
+                    task.wait(1)
+
+                    -- Fourth position (door)
+                    moveToSpam(positions.fourth, 3)
+                    if not autoFarmEnabled then break end
+                    equipTool("Flour")
+                    pressE(5)
+                    task.wait(1)
+
+                    -- Fifth position (Flour)
+                    moveToSpam(positions.fifth, 3)
+                    if not autoFarmEnabled then break end
+                    equipTool("Flour")
+                    pressE(5)
+                    task.wait(1)
+
+                    -- Sixth position (door)
+                    moveToSpam(positions.sixth, 3)
+                    if not autoFarmEnabled then break end
+                    equipTool("Flour")
+                    pressE(5)
+                    task.wait(1)
+
+                    -- Seventh position
+                    moveToSpam(positions.seventh, 3)
+                    if not autoFarmEnabled then break end
+                    task.wait(70) -- 1 minute 10 seconds
+                    pressE(1)
+                    task.wait(1)
+                end
+            end)
+        else
+            if autoFarmThread then
+                task.cancel(autoFarmThread)
+                autoFarmThread = nil
+            end
+        end
+    end
+})
+AutoFarmSection:CreateLabel({Text = 'Auto Farm Cycle:'})
+AutoFarmSection:CreateLabel({Text = '1. Get Fake ID (if needed)'})
+AutoFarmSection:CreateLabel({Text = '2. Bank Teller (holds Fake ID)'})
+AutoFarmSection:CreateLabel({Text = '3. Final Position (E Spam)'})
+
+-- Fix for GUI not closing after TP
+local function fixTeleportGUI()
+    if frame then
+        frame.Visible = false
+    end
+end
+
+-- Initial check for Fake ID when script starts
+task.wait(2)
+if hasFakeID() then
+    equipFakeID(false) -- Don't equip initially
+end
 
 player.CharacterAdded:Connect(function(newChar)
     character = newChar
@@ -571,3 +1403,4 @@ player.CharacterAdded:Connect(function(newChar)
     if titleGlowTween then titleGlowTween:Cancel() end
     if loadingPulseTween then loadingPulseTween:Cancel() end
 end)
+
