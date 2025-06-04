@@ -1220,12 +1220,9 @@ end
 
 local function trackHotChipSales()
     local currentHotChipCount = countHotChipsInInventory()
-    print("Şu anki Hot Chip sayısı:", currentHotChipCount)
-    print("Önceki Hot Chip sayısı:", previousHotChipCount)
     
     if currentHotChipCount < previousHotChipCount then
         local chipsSold = previousHotChipCount - currentHotChipCount
-        print(chipsSold .. " adet Hot Chip satıldı!")
         
         totalEarnings = totalEarnings + (2900 * chipsSold)
         totalPotatoes = totalPotatoes + chipsSold
