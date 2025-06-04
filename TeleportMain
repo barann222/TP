@@ -9,6 +9,19 @@ local character = player.Character or player.CharacterAdded:Wait()
 local camera = workspace.CurrentCamera
 local part = workspace.Blank
 local humanoid = character:FindFirstChildOfClass("Humanoid")
+-- Add these variables at the top of your script with other global variables
+-- Add these variables at the top of your script with other global variables
+local startTime = os.time()
+local totalEarnings = 0
+local totalPotatoes = 0
+local lastHotChipTime = 0
+local hotChipsPerHour = 0
+local earningsPerHour = 0
+local previousHotChipCount = 0
+
+
+
+
 
 -- Create premium teleport overlay GUI
 local screenGui = Instance.new("ScreenGui")
@@ -242,7 +255,7 @@ local TeleportSection = GeneralTab:CreateSection({
 
 
 
-local selectedLocation = "GunShop"
+local selectedLocation = "Apartments 1"
 local teleporting = false
 local connection = nil
 local arrivalTime = nil
@@ -1031,7 +1044,7 @@ local function startAutoFarm()
     end
 end
 AutoFarmSection:AddToggle({
-    Name = 'Enable Auto Farm',
+    Name = 'Enable Card Auto Farm',
     Value = false,
     Flag = 'auto_farm_toggle',
     Callback = function(state)
@@ -1160,6 +1173,70 @@ AutoFarmSection:AddButton({
     end
 })
 
+
+local function countHotChipsInInventory()
+    local hotChipCount = 0
+    local player = game:GetService("Players").LocalPlayer
+    local backpack = player:FindFirstChild("Backpack") -- Backpack'i bul
+
+    if backpack then
+        for _, item in pairs(backpack:GetChildren()) do
+            -- "Hot Chip" adını oyundaki gerçek isme göre güncelleyin
+            if item.Name == "Hot Chip" or item.Name:lower():find("hot chip") then
+                -- Miktarı kontrol et (Value objesi varsa)
+                local quantity = item:FindFirstChild("Quantity") and item.Quantity.Value or 1
+                hotChipCount = hotChipCount + quantity
+            end
+        end
+    end
+
+    return hotChipCount
+end
+
+-- EARNING STATS FUNCTIONS
+local function updateEarningStats()
+    local currentTime = os.time()
+    local elapsedHours = (currentTime - startTime) / 3600
+    
+    if elapsedHours > 0 then
+        earningsPerHour = totalEarnings / elapsedHours
+        hotChipsPerHour = totalPotatoes / elapsedHours
+    end
+end
+
+local function updateStatsDisplay()
+    if not earningsLabel or not potatoesLabel then return end
+    
+    -- Format numbers with commas
+    local function formatNumber(n)
+        return tostring(math.floor(n)):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
+    end
+    
+    earningsLabel:SetText('Total Earnings: $'..formatNumber(totalEarnings))
+    potatoesLabel:SetText('Potatoes Processed: '..formatNumber(totalPotatoes))
+    hourlyEarningsLabel:SetText('Hourly Earnings: $'..string.format("%.2f", earningsPerHour)..'/hr')
+    hourlyPotatoesLabel:SetText('Potatoes/Hour: '..string.format("%.2f", hotChipsPerHour))
+end
+
+local function trackHotChipSales()
+    local currentHotChipCount = countHotChipsInInventory()
+    print("Şu anki Hot Chip sayısı:", currentHotChipCount)
+    print("Önceki Hot Chip sayısı:", previousHotChipCount)
+    
+    if currentHotChipCount < previousHotChipCount then
+        local chipsSold = previousHotChipCount - currentHotChipCount
+        print(chipsSold .. " adet Hot Chip satıldı!")
+        
+        totalEarnings = totalEarnings + (2900 * chipsSold)
+        totalPotatoes = totalPotatoes + chipsSold
+        lastHotChipTime = os.time()
+        updateEarningStats()
+        updateStatsDisplay() -- UI'ı hemen güncelle
+    end
+    
+    previousHotChipCount = currentHotChipCount
+end
+
 AutoFarmSection:AddSlider({
     Name = "Farm Quantity",
     Flag = "farm_quantity",
@@ -1167,16 +1244,13 @@ AutoFarmSection:AddSlider({
     Max = 10,
     Default = 1,
     Increment = 1,
- Callback = function(isDragging, value)
-        if not isDragging then
-            farmQuantity = math.floor(value)  -- Ensure it's a whole number
-        end
+    Callback = function(value)
+            farmQuantity = value
     end
 })
 
-
 AutoFarmSection:AddToggle({
-    Name = 'Enable Auto Farm',
+    Name = 'Enable Hot Chip Auto Farm',
     Value = false,
     Flag = 'auto_farm_toggle1',
     Callback = function(state)
@@ -1190,34 +1264,82 @@ AutoFarmSection:AddToggle({
                 local rootPart = character:WaitForChild("HumanoidRootPart")
                 local backpack = player:WaitForChild("Backpack")
                 
-                -- Ensure farmQuantity is a whole number
-                farmQuantity = math.floor(farmQuantity or 1)
-                
                 humanoid.WalkSpeed = 20
 
-                local positions = {
-                    first = Vector3.new(-477.865, 3.862, -436.198),
-                    second = Vector3.new(-462.933, 3.862, -448.099),
-                    third = Vector3.new(-463.217, 3.862, -473.068),
-                    fourth = Vector3.new(-466.3665466308594, 4.002470016479492, -499.2865295410156),
-                    fifth = Vector3.new(-463.075, 3.862, -522.546),
-                    sixth = Vector3.new(-466.3665466308594, 4.002470016479492, -499.2865295410156),
-                    seventh = Vector3.new(-497.025, 3.862, -451.890)
+                -- Adım konumları ve hedef nesneler
+                local stepData = {
+                    [1] = {position = Vector3.new(-477.865, 3.862, -436.198), targetName = "Clipboard"},
+                    [2] = {position = Vector3.new(-462.933, 3.862, -448.099), targetName = "Potato Cutter"},
+                    [3] = {position = Vector3.new(-463.217, 3.862, -473.068), targetName = "Plastic Bag"},
+                    [4] = {position = Vector3.new(-466.3665466308594, 4.002470016479492, -499.2865295410156)},
+                    [5] = {position = Vector3.new(-463.075, 3.862, -522.546), targetName = "Union"},
+                    [6] = {position = Vector3.new(-466.3665466308594, 4.002470016479492, -499.2865295410156)},
+                    [7] = {position = Vector3.new(-497.025, 3.862, -451.890), targetName = "pot"}
                 }
 
-                local function pressE(duration)
-                    local vim = game:GetService("VirtualInputManager")
-                    vim:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                    task.wait(duration)
-                    vim:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                local function resetCamera()
+                    local camera = workspace.CurrentCamera
+                    if camera and character and character:FindFirstChild("HumanoidRootPart") then
+                        camera.CFrame = CFrame.new(camera.CFrame.Position, character.HumanoidRootPart.Position)
+                    end
                 end
 
-                local function moveToSpam(pos, threshold)
+                local function findNearestModel(targetName, position)
+                    local closestModel = nil
+                    local closestDistance = math.huge
+                    
+                    for _, model in ipairs(workspace:GetDescendants()) do
+                        if model.Name:lower() == targetName:lower() then
+                            local distance = (model:GetPivot().Position - position).Magnitude
+                            if distance < closestDistance then
+                                closestDistance = distance
+                                closestModel = model
+                            end
+                        end
+                    end
+                    
+                    return closestModel
+                end
+
+                local function triggerNearestPrompt(stepNumber, duration)
+                    local step = stepData[stepNumber]
+                    if not step or not step.targetName then return false end
+                    
+                    local model = findNearestModel(step.targetName, step.position)
+                    if not model then
+                        Library.Notify({
+                            Text = step.targetName.." model not found near step "..stepNumber,
+                            Duration = 3
+                        })
+                        return false
+                    end
+                    
+                    local prompt = model:FindFirstChildOfClass("ProximityPrompt")
+                    if not prompt then
+                        prompt = model:FindFirstChildWhichIsA("ProximityPrompt", true)
+                        if not prompt then
+                            Library.Notify({
+                                Text = "ProximityPrompt not found on "..step.targetName.." at step "..stepNumber,
+                                Duration = 3
+                            })
+                            return false
+                        end
+                    end
+                    
+                    fireproximityprompt(prompt)
+                    task.wait(duration)
+                    resetCamera()
+                    return true
+                end
+
+                local function moveToPosition(pos, threshold)
                     humanoid:MoveTo(pos)
-                    while autoFarmEnabled and (rootPart.Position - pos).Magnitude > threshold do
+                    local startTime = os.time()
+                    while autoFarmEnabled and (rootPart.Position - pos).Magnitude > threshold and (os.time() - startTime) < 10 do
                         humanoid:MoveTo(pos)
                         task.wait(0.2)
                     end
+                    return (rootPart.Position - pos).Magnitude <= threshold
                 end
 
                 local function equipTool(toolName)
@@ -1229,138 +1351,216 @@ AutoFarmSection:AddToggle({
                     end
                 end
 
-                local function checkInventory()
-                    local flourCount = 0
-                    local potatoCount = 0
+                local function countItem(itemName)
+                    local count = 0
                     
-                    -- Check backpack
+                    -- Çantayı kontrol et
                     for _, item in ipairs(backpack:GetChildren()) do
-                        if item.Name == "Flour" then
-                            flourCount = flourCount + 1
-                        elseif item.Name == "Potato" then
-                            potatoCount = potatoCount + 1
+                        if item.Name == itemName then
+                            count = count + 1
                         end
                     end
                     
-                    -- Check character
+                    -- Karakteri kontrol et
                     if character then
                         for _, item in ipairs(character:GetChildren()) do
-                            if item.Name == "Flour" then
-                                flourCount = flourCount + 1
-                            elseif item.Name == "Potato" then
-                                potatoCount = potatoCount + 1
+                            if item.Name == itemName then
+                                count = count + 1
                             end
                         end
                     end
                     
-                    return flourCount >= farmQuantity and potatoCount >= farmQuantity
+                    return count
                 end
 
                 local function purchaseItems()
-                    -- First teleport to MexicanDeli to purchase items
+                    -- First make sure farmQuantity is valid
+                    if not farmQuantity or farmQuantity <= 0 then
+                        farmQuantity = 1 -- Default to 1 if invalid
+                    end
+                    
+                    -- Safely get item counts with error handling
+                    local potatoCount = countItem("Potato") or 0
+                    local flourCount = countItem("Flour") or 0
+                    
+                    -- Calculate how many more we need to buy to make them equal
+                    local totalNeeded = farmQuantity
+                    local potatoesNeeded = math.max(0, totalNeeded - potatoCount)
+                    local flourNeeded = math.max(0, totalNeeded - flourCount)
+                    
+                    -- Calculate the difference between the two items
+                    local difference = math.abs((potatoCount + potatoesNeeded) - (flourCount + flourNeeded))
+                    
+                    -- Adjust purchases to make them equal
+                    if difference > 0 then
+                        if (potatoCount + potatoesNeeded) > (flourCount + flourNeeded) then
+                            -- More potatoes than flour, buy more flour
+                            flourNeeded = flourNeeded + difference
+                        else
+                            -- More flour than potatoes, buy more potatoes
+                            potatoesNeeded = potatoesNeeded + difference
+                        end
+                    end
+                    
+                    if potatoesNeeded == 0 and flourNeeded == 0 then
+                        return true -- Already have enough and balanced
+                    end
+                    
+                    -- Market'e git
                     selectedLocation = "MexicanDeli"
                     startTeleportProcess()
                     
-                    -- Wait for teleport to complete
                     local startTime = tick()
-                    while frame and frame.Visible and autoFarmEnabled and (tick() - startTime) < 15 do
+                    while frame and frame.Visible and autoFarmEnabled and (tick() - startTime) < 30 do
                         task.wait(0.1)
                     end
                     
                     if not autoFarmEnabled then return false end
                     
-                    -- Purchase exactly the amount specified in farmQuantity
-                    Library.Notify({
-                        Text = 'Purchasing '..farmQuantity..' of each material',
-                        Duration = 3
-                    })
-                    
-                    -- Purchase Potatoes
-                    for i = 1, farmQuantity do
-                        game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StorePurchase"):FireServer("Potato")
-                        task.wait(0.5)
+                    -- Safely purchase potatoes
+                    if potatoesNeeded > 0 then
+                        local store = game:GetService("ReplicatedStorage"):FindFirstChild("RemoteEvents")
+                        if store and store:FindFirstChild("StorePurchase") then
+                            for i = 1, potatoesNeeded do
+                                if not autoFarmEnabled then return false end
+                                store.StorePurchase:FireServer("Potato")
+                                task.wait(0.5)
+                            end
+                        else
+                            Library.Notify({Text = "Failed to find store remote", Duration = 3})
+                            return false
+                        end
                     end
                     
-                    -- Purchase Flour
-                    for i = 1, farmQuantity do
-                        game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StorePurchase"):FireServer("Flour")
-                        task.wait(0.5)
+                    -- Safely purchase flour
+                    if flourNeeded > 0 then
+                        local store = game:GetService("ReplicatedStorage"):FindFirstChild("RemoteEvents")
+                        if store and store:FindFirstChild("StorePurchase") then
+                            for i = 1, flourNeeded do
+                                if not autoFarmEnabled then return false end
+                                store.StorePurchase:FireServer("Flour")
+                                task.wait(0.5)
+                            end
+                        else
+                            Library.Notify({Text = "Failed to find store remote", Duration = 3})
+                            return false
+                        end
                     end
                     
-                    -- Teleport back to Potato location
+                    -- Farm alanına geri dön
                     selectedLocation = "Potato"
                     startTeleportProcess()
                     
-                    -- Wait for teleport to complete
                     startTime = tick()
                     while frame and frame.Visible and autoFarmEnabled and (tick() - startTime) < 15 do
                         task.wait(0.1)
                     end
                     
+                    -- Final check with nil protection
+                    potatoCount = countItem("Potato") or 0
+                    flourCount = countItem("Flour") or 0
+                    
+                    -- Check if counts are equal and meet the required quantity
+                    if potatoCount < farmQuantity or flourCount < farmQuantity or potatoCount ~= flourCount then
+                        Library.Notify({
+                            Text = 'Failed to get balanced items! Retrying...',
+                            Duration = 3
+                        })
+                        return false
+                    end
+                    
                     return true
                 end
 
-                while autoFarmEnabled do
-                    -- Check inventory and purchase if needed
-                    if not checkInventory() then
+                local function performFarmCycle()
+                    -- Step 1: Clipboard
+                    if moveToPosition(stepData[1].position, 3) then
+                        triggerNearestPrompt(1, 1)
+                    end
+                    if not autoFarmEnabled then return end
+                    task.wait(1)
 
-                        
-                        if not purchaseItems() then
-                            Library.Notify({
-                                Text = 'Failed to purchase materials',
-                                Duration = 3
-                            })
-                            task.wait(5)
-                            continue
+                    -- Step 2: Potato Cutter
+                    if moveToPosition(stepData[2].position, 3) then
+                        equipTool("Potato")
+                        triggerNearestPrompt(2, 3)
+                    end
+                    if not autoFarmEnabled then return end
+                    task.wait(1)
+
+                    -- Step 3: Plastic Bag
+                    if moveToPosition(stepData[3].position, 3) then
+                        triggerNearestPrompt(3, 4)
+                    end
+                    if not autoFarmEnabled then return end
+                    task.wait(1)
+
+                    -- Step 4: Door
+                    if moveToPosition(stepData[4].position, 1) then
+                        equipTool("Flour")
+                    end
+                    if not autoFarmEnabled then return end
+                    task.wait(1)
+
+                    -- Step 5: Bowl
+                    if moveToPosition(stepData[5].position, 3) then
+                        equipTool("Flour")
+                        triggerNearestPrompt(5, 5)
+                    end
+                    if not autoFarmEnabled then return end
+                    task.wait(1)
+
+                    -- Step 6: Door
+                    if moveToPosition(stepData[6].position, 1) then
+                        equipTool("Flour")
+                    end
+                    if not autoFarmEnabled then return end
+                    task.wait(1)
+
+                    -- Step 7: Pot
+                    if moveToPosition(stepData[7].position, 3) then
+                        triggerNearestPrompt(7, 1)
+                        task.wait(70)
+                        triggerNearestPrompt(7, 5)
+                    end
+                    if not autoFarmEnabled then return end
+                    task.wait(1)
+                end
+
+                while autoFarmEnabled do
+                    -- Önce yeterli ve eşit itemleri satın al
+                    local success = false
+                    local attempts = 0
+                    
+                    while not success and attempts < 3 and autoFarmEnabled do
+                        success = purchaseItems()
+                        attempts = attempts + 1
+                        if not success and autoFarmEnabled then
+                            task.wait(3)
                         end
                     end
-
-                    -- First position
-                    moveToSpam(positions.first, 3)
-                    if not autoFarmEnabled then break end
-                    pressE(1)
-                    task.wait(1)
-
-                    -- Second position (Potato)
-                    moveToSpam(positions.second, 3)
-                    if not autoFarmEnabled then break end
-                    equipTool("Potato")
-                    pressE(3)
-                    task.wait(1)
-
-                    -- Third position
-                    moveToSpam(positions.third, 3)
-                    if not autoFarmEnabled then break end
-                    pressE(4)
-                    task.wait(1)
-
-                    -- Fourth position (door)
-                    moveToSpam(positions.fourth, 3)
-                    if not autoFarmEnabled then break end
-                    equipTool("Flour")
-                    pressE(5)
-                    task.wait(1)
-
-                    -- Fifth position (Flour)
-                    moveToSpam(positions.fifth, 3)
-                    if not autoFarmEnabled then break end
-                    equipTool("Flour")
-                    pressE(5)
-                    task.wait(1)
-
-                    -- Sixth position (door)
-                    moveToSpam(positions.sixth, 3)
-                    if not autoFarmEnabled then break end
-                    equipTool("Flour")
-                    pressE(5)
-                    task.wait(1)
-
-                    -- Seventh position
-                    moveToSpam(positions.seventh, 3)
-                    if not autoFarmEnabled then break end
-                    task.wait(70) -- 1 minute 10 seconds
-                    pressE(1)
-                    task.wait(1)
+                    
+                    if not success and autoFarmEnabled then
+                        Library.Notify({
+                            Text = 'Could not purchase the required balanced items, Restarting...',
+                            Duration = 3
+                        })
+                        break
+                    end
+                    
+                    -- Slider değeri kadar farm cycle çalıştır
+                    for i = 1, farmQuantity do
+                        if not autoFarmEnabled then break end
+                        
+                        Library.Notify({
+                            Text = 'Farm Loop '..i..'/'..farmQuantity,
+                            Duration = 2
+                        })
+                        
+                        performFarmCycle()
+                        
+                        if not autoFarmEnabled then break end
+                    end
                 end
             end)
         else
@@ -1371,6 +1571,249 @@ AutoFarmSection:AddToggle({
         end
     end
 })
+
+-- 🔄 COMPLETE AUTO-TP SYSTEM WITH AUTO-STOP
+local teleportActive = false
+local teleportThread = nil
+local ePressThread = nil
+local holdChipsThread = nil
+local cycleThread = nil
+
+-- ALL CFrame POINTS WITH ROTATION DATA
+local teleportPoints = {
+    CFrame.new(899.395081, 1.91289663, -284.372589, -1, 1.28371894e-31, 2.36612192e-30, -1.28371894e-31, 0.994130254, -0.108189844, -2.36612192e-30, -0.108189844, -0.994130254),  -- 1
+    CFrame.new(877.011597, 2.03789663, -63.0520134, 2.36612192e-30, 0.108189844, 0.994130254, -1.28371894e-31, 0.994130254, -0.108189844, -1, 1.28371894e-31, 2.36612192e-30),       -- 2
+    CFrame.new(-274.167297, 2.16302967, -214.319305, -1, 1.28371906e-31, 2.36612192e-30, -1.28371906e-31, 0.994130254, -0.108189836, -2.36612192e-30, -0.108189836, -0.994130254),  -- 3
+    CFrame.new(699.332703, 2.03789663, -428.944336, -1, 1.28371894e-31, 2.36612192e-30, -1.28371894e-31, 0.994130254, -0.108189844, -2.36612192e-30, -0.108189844, -0.994130254),   -- 4
+    CFrame.new(518.596924, 1.53803372, -295.539978, -2.36612173e-30, -0.108189844, -0.994130254, -1.28371871e-31, 0.994130254, -0.108189844, 1, -1.28371871e-31, -2.36612173e-30),    -- 5
+    CFrame.new(53.55320739746094, 3.7298221588134766, -424.639892578125)                                                                                                           -- 6 (no rotation)
+}
+
+-- Add this section to your AutoFarmTab (after the existing sections)
+local StatsSection = AutoFarmTab:CreateSection({
+    Name = "|Earning Stats|",
+    Side = "Right"
+})
+
+
+
+local currentCFrame = teleportPoints[1]
+local completedCycles = 0
+local MAX_CYCLES = 1 -- Stop after completing full cycle
+
+local function stopAllProcesses()
+    if teleportThread then task.cancel(teleportThread) teleportThread = nil end
+    if ePressThread then task.cancel(ePressThread) ePressThread = nil end
+    if holdChipsThread then task.cancel(holdChipsThread) holdChipsThread = nil end
+    if cycleThread then task.cancel(cycleThread) cycleThread = nil end
+    
+    teleportActive = false
+    if teleportToggle then
+        teleportToggle:Set(false) -- Update UI toggle
+    end
+end
+
+
+
+
+local teleportToggle = AutoFarmSection:AddToggle({
+    Name = "🚀 Sell Hotchips",
+    Default = false,
+    Callback = function(state)
+        teleportActive = state
+        
+        if not teleportActive then
+            stopAllProcesses()
+            return
+        end
+
+        -- CYCLE THREAD (Changes CFrame every 5 seconds)
+        cycleThread = task.spawn(function()
+            completedCycles = 0
+            while teleportActive and completedCycles < MAX_CYCLES do
+                for i, cf in ipairs(teleportPoints) do
+                    if not teleportActive then break end
+                    currentCFrame = cf
+                    print("Moving to point", i)
+                    task.wait(5) -- Wait 5 sec at each point
+                end
+                completedCycles = completedCycles + 1
+            end
+            print("Completed all TP points! Stopping...")
+            stopAllProcesses()
+        end)
+
+        -- CONTINUOUS TELEPORT THREAD
+        teleportThread = task.spawn(function()
+            while teleportActive do
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local root = character:WaitForChild("HumanoidRootPart")
+                
+                -- Force TP with exact rotation
+                root.CFrame = currentCFrame
+                task.wait(0.001)
+            end
+        end)
+
+        -- AUTO E PRESS
+        ePressThread = task.spawn(function()
+            local virtualInput = game:GetService("VirtualInputManager")
+            while teleportActive do
+                virtualInput:SendKeyEvent(true, "E", false, game)
+                task.wait(0.0001)
+                virtualInput:SendKeyEvent(false, "E", false, game)
+                task.wait(0.0001)
+            end
+        end)
+
+        -- HOTCHIPS HOLD (AGGRESSIVE)
+        holdChipsThread = task.spawn(function()
+            while teleportActive do
+                local player = game.Players.LocalPlayer
+                local backpack = player.Backpack
+                local character = player.Character
+                
+                if character then
+                    -- Check for both "Hot Chips" and "Hot Chips" spelling
+                    local hotChips = backpack:FindFirstChild("Hot Chips") or 
+                                   backpack:FindFirstChild("Hot Chips") or
+                                   character:FindFirstChild("Hot Chips") or
+                                   character:FindFirstChild("Hot Chips")
+                    
+                    if hotChips and not character:FindFirstChild(hotChips.Name) then
+                        hotChips.Parent = character
+                    end
+                end
+                task.wait(0.5) -- Check every 0.5 seconds
+            end
+        end)
+    end
+})
+
+
+local StatsSection = AutoFarmTab:CreateSection({
+    Name = "|Earning Stats|",
+    Side = "Right"
+})
+
+-- Add these UI elements to display the stats
+StatsSection:CreateLabel({Text = 'Earning Statistics:'})
+
+local earningsLabel = StatsSection:CreateLabel({Text = 'Total Earnings: $0'})
+local potatoesLabel = StatsSection:CreateLabel({Text = 'Potatoes Processed: 0'})
+local hourlyEarningsLabel = StatsSection:CreateLabel({Text = 'Hourly Earnings: $0/hr'})
+local hourlyPotatoesLabel = StatsSection:CreateLabel({Text = 'Potatoes/Hour: 0'})
+
+-- Function to update the UI labels
+local function updateStatsDisplay()
+    earningsLabel:SetText('Total Earnings: $'..tostring(totalEarnings))
+    potatoesLabel:SetText('Potatoes Processed: '..tostring(totalPotatoes))
+    hourlyEarningsLabel:SetText('Hourly Earnings: $'..string.format("%.2f", earningsPerHour)..'/hr')
+    hourlyPotatoesLabel:SetText('Potatoes/Hour: '..string.format("%.2f", hotChipsPerHour))
+end
+
+-- Add a button to reset stats
+StatsSection:AddButton({
+    Name = 'Reset Stats',
+    Callback = function()
+        startTime = os.time()
+        totalEarnings = 0
+        totalPotatoes = 0
+        earningsPerHour = 0
+        hotChipsPerHour = 0
+        previousHotChipCount = countHotChipsInInventory() -- Reset to current count
+        updateStatsDisplay()
+    end
+})
+
+-- Initialize the previous count
+previousHotChipCount = countHotChipsInInventory()
+
+-- Add this to automatically update the tracking and display
+task.spawn(function()
+    while true do
+        trackHotChipSales() -- Check for inventory changes
+        updateStatsDisplay()
+        task.wait(1) -- Check every second
+    end
+end)
+
+-- Add this right after your Enable Auto Farm toggle in the AutoFarmSection
+AutoFarmSection:AddButton({
+    Name = 'Teleport to Hot Chip Guy',
+    Callback = function()
+        -- Set the target CFrame for Potato Farm
+        local targetCFrame = CFrame.new(
+            -36.0572739, 1.94469261, -25.0108242, 
+            -1.1920929e-07, -0.108189858, -0.994130373, 
+            -1.28371894e-31, 0.994130254, -0.108189844, 
+            1.00000012, -1.28972344e-08, -1.18509561e-07
+        )
+        
+        -- Backup current location
+        local currentLocation = selectedLocation
+        
+        -- Prepare teleport
+        frame.Visible = true
+        frame.Transparency = 0
+        loading.Text = "Teleporting..."
+        destinationText.Text = "Destination: Hot Chips"
+        disableBloodEffectsPermanently()
+        disableKnockoutSound()
+        startAnimations()
+        
+        -- Start teleport process
+        teleporting = true
+        spawn(function()
+            local teleportSuccess = false
+            local startTime = tick()
+            
+            -- Find homeless NPC
+            local homelessModel = getRandomHomelessModel()
+            
+            while teleporting and humanoid and humanoid.Health > 10 and (tick() - startTime) < teleportTimeout do
+                if not homelessModel or not homelessModel.Parent then
+                    homelessModel = getRandomHomelessModel()
+                end
+                
+                if homelessModel then
+                    local upperTorso = homelessModel:FindFirstChild("UpperTorso")
+                    if upperTorso then
+                        -- Position character
+                        teleportCharacter(upperTorso.CFrame * CFrame.new(0, 0, -2))
+                        
+                        -- Trigger prompt
+                        local prompt = upperTorso:FindFirstChildOfClass("ProximityPrompt")
+                        if prompt then
+                            fireproximityprompt(prompt)
+                        end
+                    end
+                else
+                    teleportCharacter(locations.Backup)
+                end
+                
+                RunService.Heartbeat:Wait()
+            end
+            
+            -- Teleport to target if still active
+            if teleporting then
+                teleportCharacter(targetCFrame)
+                arrivalTime = tick()
+                destinationText.Text = "Arrived at Hot Chips"
+                teleportSuccess = true
+            end
+            
+            -- Complete animation
+            animateTeleportComplete(teleportSuccess)
+            teleporting = false
+            
+            -- Restore original location
+            selectedLocation = currentLocation
+        end)
+    end
+})
+
 AutoFarmSection:CreateLabel({Text = 'Auto Farm Cycle:'})
 AutoFarmSection:CreateLabel({Text = '1. Get Fake ID (if needed)'})
 AutoFarmSection:CreateLabel({Text = '2. Bank Teller (holds Fake ID)'})
@@ -1403,3 +1846,4 @@ player.CharacterAdded:Connect(function(newChar)
     if titleGlowTween then titleGlowTween:Cancel() end
     if loadingPulseTween then loadingPulseTween:Cancel() end
 end)
+
